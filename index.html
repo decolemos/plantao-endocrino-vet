@@ -703,8 +703,10 @@ html:not(.casemode) body{min-height:100vh}
 .quitbtn:hover{background:#ffd9de}
 .quitbtn:active{transform:translateY(2px);box-shadow:none}
 @media (max-width:899px){html.casemode .quitbtn{height:28px;padding:0 9px;font-size:.7rem;left:6px;bottom:6px}}
-.stage .tag{max-width:calc(100% - 170px)}@media (max-width:899px){html.casemode .stage .tag{max-width:calc(100% - 128px)}}
 .quitlayer{z-index:80}
+.actions .btn.quit{flex:.8;background:var(--cream);color:#c8243f;border-color:var(--night)}
+.actions .btn.quit:hover{background:#ffd9de}
+@media (max-width:899px){html.casemode .actions .btn{white-space:nowrap;font-size:.85rem;padding-inline:6px}.actions .btn.quit{flex:0 0 auto;min-width:44px;padding-inline:10px}.actions .btn.quit .ql{display:none}}
 .quitlink{align-self:center;background:none;border:0;color:var(--ink);opacity:.7;font-weight:800;font-size:.8rem;text-decoration:underline;padding:4px 8px;cursor:pointer}.quitlink:hover{opacity:1}
 .quitcard h3{margin:0;font-family:var(--f-display);font-weight:400;font-size:1.35rem;line-height:1.15}
 .quitcard p{margin:0;font-size:.92rem;line-height:1.35}
@@ -1901,7 +1903,7 @@ function vCase(){
    <div class="bubble vet" id="b-vet"></div><div class="bubble tutor" id="b-tutor"></div>
    <span class="tag">${esc(cs.nome)} · ${esc(cs.resumo)}</span>
    <div class="intent" id="intent" hidden></div>
-   <button class="sndbtn" id="soundBtn" data-act="sound" aria-label="Som" aria-pressed="${SND.on}">${soundIcon()}</button><button class="quitbtn" data-act="quit" aria-label="Cancelar atendimento">✕ Sair</button></div>
+   <button class="sndbtn" id="soundBtn" data-act="sound" aria-label="Som" aria-pressed="${SND.on}">${soundIcon()}</button></div>
    <div class="profbar" id="profbar" aria-live="polite"><span class="hd"><svg viewBox="-22 -166 44 44" aria-hidden="true">${person({coat:true,style:'short',hair:'#c9c9c9',skin:'#e3b08a',glasses:true,beard:true})}</svg></span>
     <div><b>Professor(a) na sala</b><span id="profText">Estou aqui para ajudar. Siga as etapas da mesa, da esquerda para a direita.</span></div></div>
    <div class="queixa">${ICON.anam}<div><b>Queixa do tutor</b>“${esc(cs.fala)}”</div></div>
@@ -1912,7 +1914,7 @@ function vCase(){
     <div class="handbar" id="handbar"></div>
     <div class="hand" id="hand"></div>
    </section>
-   <div class="actions"><button class="btn ghost" data-act="log">Prontuário</button><button class="btn ghost" data-act="hint">Pedir dica</button><button class="btn end" data-act="finish" id="finishBtn">Encerrar</button></div>`;
+   <div class="actions"><button class="btn ghost" data-act="log">Prontuário</button><button class="btn ghost" data-act="hint">Pedir dica</button><button class="btn end" data-act="finish" id="finishBtn">Encerrar</button><button class="btn quit" data-act="quit" aria-label="Desistir: cancelar o atendimento e voltar para a clínica" title="Cancelar o atendimento e voltar para a clínica"><span aria-hidden="true">✕</span><span class="ql"> Desistir</span></button></div>`;
 }
 function updAll(){updHud();updHand();updScene();updVitals()}
 function updHud(){
