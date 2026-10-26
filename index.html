@@ -547,6 +547,26 @@ html:not(.casemode) .app{padding-top:58px}
 @media (max-height:640px){.start{--fz:.48;gap:8px}.start .logo h1{font-size:2rem}}
 @media (max-height:560px){.start .fan{display:none}}
 html:not(.casemode) body{min-height:100vh}
+
+/* ---------- tela de regras cabe na janela ---------- */
+.rulesscr{gap:10px}
+.rulesscr .rhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.step{background:var(--cream);color:var(--ink);border:2.5px solid var(--night);border-radius:12px;padding:6px 4px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 3px 0 var(--night);min-width:0}
+.step .ic{width:30px;height:36px;border:2px solid var(--night);border-radius:6px;display:grid;place-items:center;color:#fff;background:repeating-linear-gradient(45deg,rgba(255,255,255,.18) 0 4px,transparent 4px 9px),var(--suit)}
+.step .ic svg{width:18px;height:18px}
+.step b{font-family:var(--f-display);font-weight:400;font-size:.82rem;line-height:1.1}
+.step small{font-size:.66rem;font-weight:800;color:var(--muted);line-height:1.15}
+.rpanel{gap:8px;padding:12px 14px}
+.rl{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px 16px}
+.rl li{position:relative;padding-left:16px;font-size:.84rem;line-height:1.3}
+.rl li::before{content:"";position:absolute;left:2px;top:.45em;width:7px;height:7px;border-radius:50%;background:var(--gold-d)}
+.facesrow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 14px;font-size:.78rem;font-weight:800;border-top:2px dashed #e3d6b8;padding-top:8px}
+.facesrow span{display:inline-flex;align-items:center;gap:4px}
+.facesrow svg{width:24px;height:24px}
+@media (max-width:640px){.steps{grid-template-columns:repeat(3,minmax(0,1fr))}.rl{grid-template-columns:1fr}.rl li{font-size:.8rem}}
+@media (max-height:700px){.rulesscr{gap:8px}.step{padding:4px 3px}.step .ic{width:24px;height:28px}.step small{display:none}.rl li{font-size:.76rem;line-height:1.25}.rpanel{padding:10px 12px}.rulesscr h2{font-size:1.35rem}}
+@media (max-height:600px){.facesrow>span:first-child{display:none}.rl{gap:4px 12px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 
@@ -1662,29 +1682,17 @@ function vAvatar(){
 function face(m){const [path,fill]=MOOD[m];return `<svg viewBox="183 27 34 34" aria-hidden="true"><circle cx="200" cy="44" r="15" fill="${fill}" stroke="#1d2f2d" stroke-width="2"/><circle cx="194.5" cy="40" r="2.2" fill="#1d2f2d"/><circle cx="205.5" cy="40" r="2.2" fill="#1d2f2d"/><path d="${path}" stroke="#1d2f2d" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>`}
 function vRules(){
   st.rulesSeen=true;
-  const step=(k,t,txt)=>`<li><span class="ic s-${k}" style="background:var(--suit)">${ICON[k]}</span><div><b>${t}</b>${txt}</div></li>`;
-  return `<section class="cover"><p class="eyebrow">Antes de começar</p><h2>Como jogar</h2>
-   <p>Você atende um paciente. Primeiro faz a triagem, depois usa as pilhas de cartas:</p>
-   <ol class="rules">
-    <li><span class="ic s-emg" style="background:var(--suit)">${ICON.emg}</span><div><b>Triagem</b>Olhe os sinais vitais: o paciente está estável ou instável? Se estiver instável, aparece a pilha vermelha de <b>Emergência</b>. Use-a primeiro!</div></li>
-    ${step('anam','1. Anamnese','Faça perguntas ao tutor.')}
-    ${step('fis','2. Exame físico','Examine o animal.')}
-    ${step('exm','3. Laboratório','Peça exames. Cada um custa dinheiro do tutor.')}
-    ${step('dx','4. Diagnóstico','Escolha o que o animal tem.')}
-    ${step('tx','5. Conduta','Escolha o tratamento. A ordem importa!')}
-   </ol>
-   <div class="panel"><h3>Regras rápidas</h3><ul class="list">
-    <li>Toque numa carta para ver maior, depois em <b>Jogar carta</b>.</li>
-    <li>Cada carta gasta <b>1 turno</b>. O tempo de consulta é limitado.</li>
-    <li>Animais graves <b>pioram a cada turno</b> até receberem o tratamento certo.</li>
-    <li>As pilhas são livres: toque em qualquer uma, quando quiser. A ordem 1 a 5 é só uma sugestão, e a pilha sugerida balança em amarelo.</li>
-    <li>Travou? O professor ajuda no botão <b>Pedir dica</b> (grátis no modo Fácil).</li>
-    <li>Escolha a dificuldade na sala de espera: <b>Fácil</b> (sem limite de turnos) ou <b>Desafio</b>.</li>
-    <li>Cada atendimento dá <b>XP</b> para subir de nível e desbloquear conquistas.</li>
-    <li><b>Plantão:</b> atenda 3 pacientes seguidos, escolhendo quem entra. Entre um e outro, ganhe um <b>item</b> que ajuda até o fim do plantão.</li>
-    <li>No fim, toque em <b>Encerrar atendimento</b> para ver o desfecho e seu relatório.</li></ul></div>
-   <div class="panel"><h3>A carinha acima do pet mostra como você está indo</h3>
-    <div class="faces"><div>${face('feliz')}Boa escolha</div><div>${face('serio')}Não ajudou muito</div><div>${face('triste')}Erro</div></div></div>
+  const S=[['emg','Triagem','Estável ou instável?'],['anam','Anamnese','Pergunte ao tutor'],['fis','Exame físico','Examine o animal'],['exm','Laboratório','Custa dinheiro'],['dx','Diagnóstico','O que ele tem?'],['tx','Conduta','A ordem importa!']];
+  return `<section class="cover rulesscr"><div class="rhead"><p class="eyebrow">Antes de começar</p><h2>Como jogar</h2></div>
+   <div class="steps">${S.map(([k,t,d],i)=>`<div class="step"><span class="ic s-${k}">${ICON[k]}</span><b>${i?i+'. ':''}${t}</b><small>${d}</small></div>`).join('')}</div>
+   <div class="panel rpanel"><ul class="rl">
+    <li><b>Toque numa carta</b> para ver maior e depois em <b>Jogar carta</b>. Cada carta gasta 1 turno.</li>
+    <li><b>Paciente instável?</b> Use primeiro a pilha vermelha de <b>Emergência</b>: ele perde vida a cada carta.</li>
+    <li><b>As pilhas são livres.</b> A sugerida balança em amarelo.</li>
+    <li><b>Travou?</b> Toque em <b>Pedir dica</b> e o professor ajuda.</li>
+    <li><b>Plantão:</b> 3 pacientes seguidos, com um <b>item</b> de prêmio entre eles.</li>
+    <li><b>Encerrar</b> mostra o desfecho, o relatório e o XP ganho.</li></ul>
+    <div class="facesrow"><span>A carinha mostra como você está indo:</span><span>${face('feliz')}boa</span><span>${face('serio')}hum…</span><span>${face('triste')}erro</span></div></div>
    <button class="btn" data-act="go" data-v="clinic">Entendi, ir para a clínica</button></section>`;
 }
 function vClinic(){
