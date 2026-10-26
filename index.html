@@ -588,6 +588,84 @@ html:not(.casemode) body{min-height:100vh}
  .rulesscr .facesrow svg{width:clamp(26px,4.6vh,46px);height:clamp(26px,4.6vh,46px)}
  .rulesscr .btn{min-height:clamp(48px,8vh,76px);font-size:clamp(1.1rem,2.6vh,1.6rem)}
 }
+
+/* ---------- sala de espera cabe na tela ---------- */
+.clinicscr{gap:8px}
+.cleft,.cright{display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0}
+.cstage{height:clamp(84px,17vh,190px);flex:none}
+.cstage svg.scene{height:100%}
+.cstage .tag{font-size:.7rem}
+.pcard2{flex-direction:row;align-items:center;gap:12px;padding:8px 12px}
+.pav{width:44px;flex:0 0 44px}
+.pinfo{min-width:0;flex:1;display:flex;flex-direction:column;gap:2px}
+.pname{font-family:var(--f-display);font-weight:400;font-size:1.15rem;line-height:1.1}
+.lvline{display:flex;align-items:center;gap:8px}
+.lvline .lvlnum{width:34px;height:34px;font-size:1.1rem;border-width:2.5px;box-shadow:0 2px 0 var(--night)}
+.lvtext{min-width:0;flex:1;font-size:.8rem}
+.lvtext small{color:var(--muted);font-weight:700;font-size:.7rem}
+.lvtext .xpbar{height:9px;margin:2px 0}
+.medpanel{padding:8px 12px;gap:4px}
+.medals.mini{grid-template-columns:repeat(9,minmax(0,1fr));gap:4px}
+.medals.mini .medal{font-size:.52rem}
+.medals.mini .medal svg{width:24px;height:28px}
+.medals.mini .medal b{display:none}
+.stepbox{padding:10px 12px;gap:8px}
+.stepn{margin:0;display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-size:1.05rem;color:var(--ink)}
+.stepn span{width:26px;height:26px;border-radius:50%;background:var(--night);color:var(--gold);display:grid;place-items:center;font-size:.9rem;flex:none}
+.modes .mode{padding:7px 10px}
+.modes .mode b{font-size:1.05rem}
+.modes .mode small{font-size:.68rem;line-height:1.25}
+.playopt{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:3px solid var(--night);border-radius:14px;padding:8px 12px;box-shadow:var(--pop);color:#fff;
+  background:linear-gradient(#5fe0cf,var(--scrub));transition:transform .1s}
+.playopt:active{transform:translateY(4px);box-shadow:0 1px 0 var(--night)}
+.playopt b{font-family:var(--f-display);font-weight:400;font-size:1.15rem;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+.playopt small{font-size:.72rem;font-weight:800;opacity:.95;line-height:1.25}
+.playopt.main{background:linear-gradient(#ffd85c,var(--gold) 55%,#f2a91c);color:var(--night)}
+.playopt.main b{text-shadow:none}
+.playopt em{position:absolute;top:-10px;right:10px;font-style:normal;background:var(--coral);color:#fff;border:2px solid var(--night);border-radius:99px;padding:0 8px;font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+.links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.links .btn{min-height:36px;font-size:.78rem;padding:4px 6px;line-height:1.1}
+@media (max-height:700px){.clinicscr{gap:6px}.cleft,.cright{gap:6px}.modes .mode small{display:none}.medpanel .eyebrow{font-size:.7rem}.playopt small{font-size:.66rem}}
+@media (min-width:900px){
+ .clinicscr{display:grid;grid-template-columns:1.12fr 1fr;gap:clamp(12px,1.6vw,22px);height:calc(100vh - 110px)}
+ .cleft,.cright{gap:clamp(10px,1.8vh,18px)}
+ .cstage{flex:1;height:auto;min-height:0}
+ .cstage .tag{font-size:clamp(.75rem,1.6vh,.95rem)}
+ .pcard2{padding:clamp(10px,1.8vh,18px) 16px}
+ .pav{width:clamp(44px,8vh,72px);flex-basis:clamp(44px,8vh,72px)}
+ .pname{font-size:clamp(1.2rem,3vh,1.7rem)}
+ .lvtext{font-size:clamp(.85rem,1.9vh,1.05rem)}
+ .lvtext small{font-size:clamp(.72rem,1.5vh,.9rem)}
+ .lvline .lvlnum{width:clamp(34px,5.4vh,48px);height:clamp(34px,5.4vh,48px);font-size:clamp(1.1rem,2.6vh,1.5rem)}
+ .medals.mini .medal b{display:block;font-size:clamp(.52rem,1.2vh,.7rem)}
+ .medals.mini .medal svg{width:clamp(24px,4vh,36px);height:clamp(28px,4.6vh,42px)}
+ .cright{justify-content:space-between}
+ .stepbox{flex:1;justify-content:center;padding:clamp(10px,2vh,22px) clamp(12px,1.6vw,22px);gap:clamp(8px,1.6vh,16px)}
+ .stepn{font-size:clamp(1.05rem,2.6vh,1.5rem)}
+ .stepn span{width:clamp(26px,4vh,38px);height:clamp(26px,4vh,38px);font-size:clamp(.9rem,2vh,1.2rem)}
+ .modes .mode{padding:clamp(8px,1.6vh,16px) 12px}
+ .modes .mode b{font-size:clamp(1.05rem,2.6vh,1.5rem)}
+ .modes .mode small{display:block;font-size:clamp(.72rem,1.7vh,.95rem)}
+ .playopt{padding:clamp(8px,1.6vh,16px) 14px}
+ .playopt b{font-size:clamp(1.15rem,2.8vh,1.6rem)}
+ .playopt small{font-size:clamp(.74rem,1.7vh,.98rem)}
+ .links .btn{min-height:clamp(38px,5.6vh,52px);font-size:clamp(.8rem,1.8vh,1rem)}
+}
+
+.cstage{background:linear-gradient(#f1e4cf 0 53%,#e4d2b4 53% 72%,#ece5d6 72%)}
+.medcount{display:none}
+@media (max-width:899px){
+ .medpanel{display:none}.medcount{display:inline}
+ .cstage{height:clamp(70px,14vh,150px)}
+ .stepbox{padding:8px 10px;gap:6px}
+ .stepn{font-size:.95rem}.stepn span{width:22px;height:22px;font-size:.8rem}
+ .pcard2{padding:6px 10px}.pav{width:36px;flex-basis:36px}.pname{font-size:1.05rem}
+ .playopt{padding:6px 10px}.playopt b{font-size:1.02rem}
+ .links .btn{min-height:32px;font-size:.72rem}
+}
+@media (max-width:899px) and (max-height:660px){
+ .cstage{height:58px}.pinfo .eyebrow{display:none}.playopt:not(.main) small{display:none}.lvline .lvlnum{width:28px;height:28px;font-size:.95rem}
+}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 
@@ -1722,26 +1800,31 @@ function vClinic(){
   const pairs=show.map((c,i)=>{const x=58+i*95;return `<g transform="translate(${x} 196)">
     <g transform="translate(22 0) scale(.55)">${person(c.tutor)}</g>
     <g transform="translate(-14 0) scale(${c.esp==='gato'?.5:.45})">${petSVG(c)}</g></g>`}).join('');
-  return `<section class="cover">
-   <div class="stage"><svg class="scene" viewBox="0 0 400 220" role="img" aria-label="Sala de espera com pacientes e tutores">
-    <rect width="400" height="160" fill="#f1e4cf"/><rect y="118" width="400" height="42" fill="#e4d2b4"/><rect y="116" width="400" height="4" fill="#cfb68f"/>
-    <rect y="160" width="400" height="60" fill="#ece5d6"/><path d="M0 180H400M0 200H400" stroke="#d6ccb7"/>
-    <rect x="130" y="16" width="140" height="30" rx="6" fill="#0f6e66"/><text x="200" y="36" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="sans-serif">Recepção · Plantão</text>
-    <rect x="18" y="30" width="54" height="40" rx="3" fill="#fffdf6" stroke="#d8cfb9"/><text x="45" y="45" text-anchor="middle" font-size="6.5" font-weight="700" fill="#c0443a" font-family="sans-serif">PESE SEU PET</text><text x="45" y="58" text-anchor="middle" font-size="9" font-family="monospace" fill="#1d2f2d">0,0 kg</text>
-    <rect x="320" y="28" width="62" height="44" rx="3" fill="#fffdf6" stroke="#d8cfb9"/><path d="M332 40h38M332 48h30M332 56h34" stroke="#cfc3a6" stroke-width="3"/>
-    ${pairs}</svg></div>
-   <div class="panel" style="flex-direction:row;align-items:center"><div style="width:56px;flex:0 0 56px">${avatarSVG(st.avatar==='f')}</div>
-    <div style="min-width:0"><p class="eyebrow">Plantonista</p><h2>${st.avatar==='f'?'Dra.':'Dr.'} ${esc(st.name)}</h2>
-    <p class="muted">${queue.length} paciente${queue.length===1?'':'s'} na fila. O próximo é sorteado.</p></div></div>
-   <div class="panel"><div class="xprow"><span class="lvlnum">${levelOf(PROG.xp).i+1}</span><div style="min-width:0;flex:1"><p class="eyebrow">Seu nível</p><b class="lvlname">${esc(levelOf(PROG.xp).name)}</b>
-     <div class="xpbar"><i style="width:${levelOf(PROG.xp).pct}%"></i></div><small class="muted">${PROG.xp} XP${levelOf(PROG.xp).next!==null?` · faltam ${levelOf(PROG.xp).next-PROG.xp} XP para o próximo nível`:' · nível máximo'}</small></div></div>
-    <div class="medals">${BADGES.map(b=>badgeHTML(b[0],PROG.badges.includes(b[0]))).join('')}</div></div>
-   <div class="panel"><p class="eyebrow">Dificuldade</p><div class="modes">
-    <button class="mode" data-act="mode" data-v="facil" aria-pressed="${st.mode!=='desafio'}"><b>Fácil</b><small>Turnos sem limite, dicas grátis e 50% a mais de orçamento.</small></button>
-    <button class="mode" data-act="mode" data-v="desafio" aria-pressed="${st.mode==='desafio'}"><b>Desafio</b><small>Turnos limitados, dica custa 2 pontos. Ganha 50% a mais de XP.</small></button></div></div>
-   <button class="btn" data-act="startrun">Começar plantão (${RUN_SIZE} pacientes)</button>
-   <button class="btn ghost" data-act="next">Treinar um caso avulso</button>
-   <div class="row"><button class="btn ghost" data-act="go" data-v="rules">Como jogar</button><button class="btn ghost" data-act="go" data-v="board">Painel da turma</button><button class="btn ghost" data-act="go" data-v="avatar">Trocar personagem</button></div></section>`;
+  const lv=levelOf(PROG.xp),got=PROG.badges.length;
+  return `<section class="cover clinicscr">
+   <div class="cleft">
+    <div class="stage cstage"><svg class="scene" viewBox="0 0 400 220" preserveAspectRatio="xMidYMax meet" role="img" aria-label="Sala de espera com pacientes e tutores">
+     <rect width="400" height="160" fill="#f1e4cf"/><rect y="118" width="400" height="42" fill="#e4d2b4"/><rect y="116" width="400" height="4" fill="#cfb68f"/>
+     <rect y="160" width="400" height="60" fill="#ece5d6"/><path d="M0 180H400M0 200H400" stroke="#d6ccb7"/>
+     <rect x="130" y="16" width="140" height="30" rx="6" fill="#0f6e66"/><text x="200" y="36" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="sans-serif">Recepção · Plantão</text>
+     <rect x="18" y="30" width="54" height="40" rx="3" fill="#fffdf6" stroke="#d8cfb9"/><text x="45" y="45" text-anchor="middle" font-size="6.5" font-weight="700" fill="#c0443a" font-family="sans-serif">PESE SEU PET</text><text x="45" y="58" text-anchor="middle" font-size="9" font-family="monospace" fill="#1d2f2d">0,0 kg</text>
+     <rect x="320" y="28" width="62" height="44" rx="3" fill="#fffdf6" stroke="#d8cfb9"/><path d="M332 40h38M332 48h30M332 56h34" stroke="#cfc3a6" stroke-width="3"/>
+     ${pairs}</svg><span class="tag">Sala de espera · ${queue.length||CASES.length} pacientes aguardando</span></div>
+    <div class="panel pcard2"><div class="pav">${avatarSVG(st.avatar==='f')}</div>
+     <div class="pinfo"><p class="eyebrow">Plantonista</p><b class="pname">${st.avatar==='f'?'Dra.':'Dr.'} ${esc(st.name)}</b>
+      <div class="lvline"><span class="lvlnum">${lv.i+1}</span><div class="lvtext"><b>Nível ${lv.i+1}: ${esc(lv.name)}</b><div class="xpbar"><i style="width:${lv.pct}%"></i></div>
+       <small>${PROG.xp} XP${lv.next!==null?` · faltam ${lv.next-PROG.xp} para subir`:' · nível máximo'}<span class="medcount"> · ${got} de ${BADGES.length} conquistas</span></small></div></div></div></div>
+    <div class="panel medpanel"><p class="eyebrow">Conquistas · ${got} de ${BADGES.length}</p><div class="medals mini">${BADGES.map(b=>badgeHTML(b[0],PROG.badges.includes(b[0]))).join('')}</div></div>
+   </div>
+   <div class="cright">
+    <div class="panel stepbox"><p class="stepn"><span>1</span>Escolha a dificuldade</p><div class="modes">
+     <button class="mode" data-act="mode" data-v="facil" aria-pressed="${st.mode!=='desafio'}"><b>Fácil</b><small>Sem limite de turnos, dicas grátis e mais dinheiro do tutor.</small></button>
+     <button class="mode" data-act="mode" data-v="desafio" aria-pressed="${st.mode==='desafio'}"><b>Desafio</b><small>Turnos limitados e dica custa pontos. Ganha mais XP.</small></button></div></div>
+    <div class="panel stepbox"><p class="stepn"><span>2</span>Escolha como jogar</p>
+     <button class="playopt main" data-act="startrun"><b>Começar plantão</b><small>${RUN_SIZE} pacientes seguidos: você escolhe quem atender e ganha itens entre eles.</small><em>Recomendado</em></button>
+     <button class="playopt" data-act="next"><b>Treinar um caso avulso</b><small>1 paciente sorteado, para praticar rápido.</small></button></div>
+    <div class="links"><button class="btn ghost small" data-act="go" data-v="rules">Como jogar</button><button class="btn ghost small" data-act="go" data-v="board">Painel da turma</button><button class="btn ghost small" data-act="go" data-v="avatar">Trocar personagem</button></div>
+   </div></section>`;
 }
 function vCase(){
   const cs=st.c.cs;
@@ -1927,7 +2010,7 @@ function burst(color,n){
 function render(){
   $('#overlay').innerHTML='';
   document.documentElement.classList.toggle('casemode',st.screen==='case');
-  document.documentElement.classList.toggle('widemode',st.screen==='rules');
+  document.documentElement.classList.toggle('widemode',st.screen==='rules'||st.screen==='clinic');
   let gs=$('#globalSnd');if(!gs){gs=document.createElement('button');gs.id='globalSnd';gs.className='sndbtn global';gs.dataset.act='sound';gs.setAttribute('aria-label','Som e música');document.body.appendChild(gs)}
   gs.innerHTML=soundIcon();gs.setAttribute('aria-pressed',SND.on);gs.hidden=st.screen==='case';syncMusic();
   const v={start:vStart,avatar:vAvatar,rules:vRules,clinic:vClinic,case:vCase,result:vResult,board:vBoard,pick:vPick,item:vItem,runend:vRunEnd}[st.screen]();
