@@ -539,6 +539,14 @@ html:not(.casemode) .app{padding-top:58px}
 .itemcard{aspect-ratio:auto;display:flex}
 .itemcard .tcg{position:relative;inset:auto;flex:1;min-height:100%}
 .itemcard .art{flex:0 0 66px}
+
+/* ---------- tela inicial cabe na janela ---------- */
+.start .fan{zoom:var(--fz,1)}
+@media (max-height:900px){.start{gap:10px}.start .logo h1{font-size:clamp(2.2rem,7.2vh,3.4rem)}.start{--fz:.8}.start .panel{padding:12px;gap:8px}.start input[type=text]{padding:10px}.start .btn{min-height:44px;padding-block:8px}.start .intro{font-size:.92rem}}
+@media (max-height:760px){.start{--fz:.62}.start .logo h1{font-size:clamp(2rem,6.6vh,3rem)}.start .intro{font-size:.85rem;line-height:1.35}.start .badge{font-size:.72rem;padding:2px 10px}}
+@media (max-height:640px){.start{--fz:.48;gap:8px}.start .logo h1{font-size:2rem}}
+@media (max-height:560px){.start .fan{display:none}}
+html:not(.casemode) body{min-height:100vh}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 
@@ -1635,7 +1643,7 @@ let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(st.
 /* ---------- telas ---------- */
 function vStart(){
   const sample=[['anam',{t:'Ele está bebendo mais água?'}],['exm',{t:'Glicemia',c:20}],['tx',{t:'Soro na veia (fluidoterapia)'}]];
-  return `<section class="cover"><div class="logo"><span class="badge">Endocrinologia gastrointestinal</span>
+  return `<section class="cover start"><div class="logo"><span class="badge">Endocrinologia gastrointestinal</span>
    <h1>Plantão<span>Endócrino Vet</span></h1></div>
    <div class="fan">${sample.map(([k,c],i)=>`<div class="bigtcg c${i+1}">${tcgHTML(k,c)}</div>`).join('')}</div>
    <p class="intro">Monte o atendimento com suas cartas: pergunte, examine, peça exames, feche o diagnóstico e trate. Cuidado com o tempo e o dinheiro do tutor!</p>
