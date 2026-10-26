@@ -712,6 +712,25 @@ html:not(.casemode) body{min-height:100vh}
 .quitcard p{margin:0;font-size:.92rem;line-height:1.35}
 .quitcard .row{display:flex;gap:8px;flex-wrap:wrap}.quitcard .row .btn{flex:1 1 160px}
 .btn.danger{background:linear-gradient(#ff8f9f,#e8414f);color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+/* etapas em ordem */
+.actions .btn.adv{flex:1.6}
+.deck.lock{opacity:.42;filter:grayscale(.7);cursor:not-allowed}
+.deck.lock .back::after{content:"🔒";position:absolute;bottom:-4px;right:-4px;font-size:.8rem;line-height:1;background:var(--night);border-radius:50%;padding:3px}
+.deck.done{opacity:.7}
+.deck.done .n{background:#5fe0a8}
+.deck.now .back{animation:nudge 1.6s ease-in-out infinite}
+.deck.now .st{opacity:1;color:#ffd36b}
+.table{position:relative}
+.phaseban{position:absolute;left:50%;top:46%;z-index:12;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 26px;border-radius:18px;border:3px solid var(--night);background:var(--cream);color:var(--night);box-shadow:0 6px 0 var(--night),0 0 0 6px color-mix(in srgb,var(--suit,#ffd36b) 55%,transparent);pointer-events:none;animation:phban 2.3s ease forwards;text-align:center;white-space:nowrap}
+.phaseban small{font-weight:900;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+.phaseban b{font-family:var(--f-display);font-weight:400;font-size:clamp(1.4rem,3.2vh,2rem);line-height:1.1}
+.phaseban span{font-weight:800;font-size:.85rem}
+@keyframes phban{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}20%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-60%) scale(.96)}}
+.destino{display:flex;gap:12px;align-items:center;margin:10px auto 4px;max-width:520px;text-align:left;background:#fff;border:2.5px solid var(--night);border-radius:14px;padding:10px 14px;box-shadow:0 3px 0 var(--night)}
+.destino .di{font-size:1.9rem;line-height:1}
+.destino b{display:block;font-family:var(--f-display);font-weight:400;font-size:1.15rem}
+.destino small{display:block;font-size:.86rem;line-height:1.35;opacity:.85}
+.destino.g-bom{background:#e3fbef}.destino.g-ressalva{background:#fff5d6}.destino.g-ruim{background:#ffe6e6}.destino.g-obito{background:#e6e8f0}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 
@@ -1512,6 +1531,11 @@ ICON.emg='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h6l-1 
 
 /* ---------- estado ---------- */
 const PH=[['anam','Anamnese'],['fis','Exame físico'],['exm','Laboratório'],['dx','Diagnóstico'],['tx','Conduta']];
+const LIMS={facil:{anam:5,fis:3,exm:4,tx:4},desafio:{anam:4,fis:2,exm:3,tx:4}};
+const PNAME={emg:'Emergência',anam:'Anamnese',fis:'Exame físico',exm:'Laboratório',dx:'Diagnóstico',tx:'Conduta'};
+const PUNIT={anam:['pergunta','perguntas'],fis:['exame','exames'],exm:['exame','exames'],tx:['conduta','condutas']};
+/* internação ou tratamento em casa, por caso */
+const DESTINO={tom:3,rex:2,luna:3,bob:2,kiko:4};
 const KIND={emg:'Emergência',anam:'Pergunta',fis:'Exame físico',exm:'Laboratório',dx:'Diagnóstico',tx:'Conduta'};
 const G={bom:'Melhorou',ressalva:'Melhorou com ressalva',ruim:'Piorou',obito:'Faleceu'};
 const FLUIDS=['t_flu','t_dex','t_kcl','t_glicos'];
@@ -1545,7 +1569,7 @@ function startCase(forceId){
   const tri=Object.assign({},TRIAGE[cs.id],{v:vitalsAt(cs,0).map(([l,t,f])=>[l,t,f!=='ok'?'alto':''])});deck.emg=[];hand.emg=[];
   if(tri.emg){deck.tx=deck.tx.filter(i=>!tri.emg.includes(i));hand.tx=hand.tx.filter(i=>!tri.emg.includes(i));refillFrom(deck,hand,'tx');hand.emg=shuffle(tri.emg)}
   st.c={cs,deck,hand,locked,fresh:new Set(),shown:new Set(),played:[],log:[],stab:cs.stab,turns:0,spent:0,dx:null,tab:'anam',sel:null,
-    maxT:st.mode==='desafio'?cs.maxT:Infinity,budget:(st.mode==='desafio'?cs.budget:Math.round(cs.budget*1.5/10)*10)+(hasItem('plano')?100:0),
+    maxT:Infinity,phase:null,used:{anam:0,fis:0,exm:0,tx:0},lim:LIMS[st.mode==='desafio'?'desafio':'facil'],budget:(st.mode==='desafio'?cs.budget:Math.round(cs.budget*1.5/10)*10)+(hasItem('plano')?100:0),
     clues:[],stabilized:!cs.stabilizers.length,dead:false,timeout:false,busy:true,hintIdx:0,hintsAsked:0,meh:0,emergTold:false,tri,triage:null,emgOn:false};
   st.screen='case';render();window.scrollTo(0,0);
   setTimeout(()=>petSound(cs),700);
@@ -1565,6 +1589,58 @@ function doQuit(){
   C.quit=true;C.busy=true;try{alarm(false)}catch(e){}
   $('#overlay').innerHTML='';st.run=null;st.screen='clinic';render();window.scrollTo(0,0);
 }
+function phaseLeft(){const C=st.c,p=C.phase;return p in C.lim?C.lim[p]-C.used[p]:null}
+function phaseIntro(p){
+  const C=st.c,n=C.lim[p],u=PUNIT[p];
+  return {emg:'Emergência: escolha o que estabiliza o paciente. A consulta só segue depois disso.',
+   anam:`Etapa 1 · Anamnese: você tem até ${n} perguntas para o tutor. Escolha as que mais ajudam.`,
+   fis:`Etapa 2 · Exame físico: até ${n} exames. Procure os achados que confirmam sua suspeita.`,
+   exm:`Etapa 3 · Laboratório: até ${n} exames, e cada um gasta dinheiro do tutor.`,
+   dx:'Etapa 4 · Diagnóstico: releia o quadro de pistas e escolha a doença. Não dá para trocar depois.',
+   tx:`Etapa 5 · Conduta: jogue até ${n} condutas, na ordem certa. Depois toque em Finalizar.`}[p];
+}
+function phaseBanner(){
+  const C=st.c,p=C.phase,tb=document.querySelector('.table');if(!tb||!p)return;
+  const i=['anam','fis','exm','dx','tx'].indexOf(p);
+  const sub=p==='emg'?'Estabilize o paciente':p==='dx'?'Escolha 1 diagnóstico':`Até ${C.lim[p]} ${PUNIT[p][1]}`;
+  const old=tb.querySelector('.phaseban');if(old)old.remove();
+  const b=document.createElement('div');b.className='phaseban s-'+p;b.setAttribute('aria-live','polite');
+  b.innerHTML=`<small>${p==='emg'?'Primeiro':'Etapa '+(i+1)+' de 5'}</small><b>${PNAME[p]}</b><span>${sub}</span>`;
+  tb.appendChild(b);setTimeout(()=>b.remove(),2300);
+}
+function canAdvance(){
+  const C=st.c,p=C.phase;if(!p||C.result||C.busy)return false;
+  if(p==='emg')return C.stabilized;
+  if(p==='dx')return !!C.dx;
+  return p!=='tx';
+}
+function advance(){
+  const C=st.c;if(!C||C.result||C.quit||st.screen!=='case')return;
+  const order=['emg','anam','fis','exm','dx','tx'],nx=order[order.indexOf(C.phase)+1];if(!nx)return;
+  if(C.phase==='emg'&&C.hand.emg.length){
+    /* cartas de emergência que sobraram voltam para a pilha de conduta */
+    const okT=new Set(C.cs.tx.filter(c=>c.ok).map(c=>c.id));
+    let h=C.hand.emg.concat(C.hand.tx);C.hand.emg=[];
+    while(h.length>HAND+1){const j=h.map(i=>okT.has(i)).lastIndexOf(false);if(j<0)break;C.deck.tx.push(h[j]);h.splice(j,1)}
+    C.hand.tx=h;
+  }
+  C.phase=nx;C.tab=nx;C.sel=null;sfx('deal');updAll();phaseBanner();
+  setTimeout(()=>prof(phaseIntro(nx)),400);
+}
+function checkPhase(){
+  const C=st.c,p=C.phase;if(C.result||!p)return;
+  let done=false;
+  if(p==='emg')done=C.stabilized||!C.hand.emg.length;
+  else if(p==='dx')done=false;
+  else{
+    const k=p,aff=k!=='exm'||C.hand.exm.some(id=>C.spent+cardOf(id)[1].c<=C.budget);
+    done=C.used[k]>=C.lim[k]||!C.hand[k].length||!aff;
+  }
+  if(!done)return;
+  if(p==='tx'){C.busy=true;setTimeout(()=>{C.busy=false;if(!C.result){prof('Plano de tratamento completo. Vamos ver como o paciente evolui.');C.busy=true;finish()}},1500);return}
+  if(p==='emg'&&C.stabilized)setTimeout(()=>prof('Paciente estabilizado! Agora a consulta segue normalmente.'),300);
+  C.busy=true;setTimeout(()=>{C.busy=false;advance()},p==='exm'?1700:1300);
+}
 function refillFrom(deck,hand,k){while(hand[k].length<HAND&&deck[k].length)hand[k].push(deck[k].shift())}
 function showTriage(){
   const C=st.c;if(st.screen!=='case'||C.triage)return;
@@ -1579,20 +1655,21 @@ function showTriage(){
 function chooseTriage(v){
   const C=st.c;if(C.triage)return;
   const inst=!!C.tri.inst,ok=(v==='1')===inst;C.triage=ok?'ok':'erro';C.busy=false;$('#overlay').innerHTML='';
-  if(inst){C.emgOn=true;C.tab='emg'}
-  updAll();
+  if(inst){C.emgOn=true}
+  C.phase=inst?'emg':'anam';C.tab=C.phase;
+  updAll();phaseBanner();
   react(ok?'feliz':'triste',{skip:true});
   if(inst&&ok)setTimeout(()=>prof('Isso! Paciente instável. Use a pilha vermelha de Emergência para estabilizar antes de investigar.'),900);
   else if(inst){C.stab=Math.max(5,C.stab-10);updAll();setTimeout(()=>prof('Atenção: esses sinais mostram um paciente instável! Abri a pilha vermelha de Emergência. Estabilize primeiro.'),900)}
-  else if(ok)setTimeout(()=>prof('Boa! Paciente estável. Comece pela anamnese: toque numa carta para perguntar ao tutor.'),900);
-  else setTimeout(()=>prof('Calma, este paciente está estável. Pode seguir a consulta normalmente, começando pela anamnese.'),900);
+  else if(ok)setTimeout(()=>prof('Boa! Paciente estável. '+phaseIntro('anam')),900);
+  else setTimeout(()=>prof('Calma, este paciente está estável. '+phaseIntro('anam')),900);
   if(hasItem('manual')){C.hintIdx=1;setTimeout(()=>prof('Manual de bolso: '+C.cs.hints[0]),3600)}
   if(!st.tutDone)setTimeout(()=>tutorial(0),ok?2600:3200);
 }
 const TUT=[
- ['#decks','Estas são suas pilhas de cartas. Toque em qualquer uma, quando quiser: você pode ir e voltar livremente.'],
- ['#hand','Toque numa carta para ver maior. Depois toque em "Jogar carta". Cada carta gasta 1 turno.'],
- ['#finishBtn','Quando tiver um diagnóstico e pelo menos uma conduta, toque em Encerrar para ver o resultado.']
+ ['#decks','A consulta segue em etapas, da esquerda para a direita. A etapa acesa é a atual; as próximas abrem sozinhas.'],
+ ['#hand','Toque numa carta para ver maior e depois em "Jogar carta". Cada etapa tem um número de cartas, mostrado no topo.'],
+ ['#finishBtn','Quando as cartas da etapa acabarem, a próxima começa sozinha. Se já tiver o que precisa, toque aqui para avançar antes.']
 ];
 function tutorial(i){
   const C=st.c;if(st.screen!=='case'||C.result)return;
@@ -1648,7 +1725,7 @@ function playSel(){
 }
 function resolve(k,card){
   const C=st.c,cs=C.cs;
-  if(k==='dx'){C.dx=card.id;say('vet','Minha hipótese: '+card.t+'.','Diagnóstico');react(rate(k,card),card);updAll();return}
+  if(k==='dx'){C.dx=card.id;say('vet','Minha hipótese: '+card.t+'.','Diagnóstico');react(rate(k,card),card);updAll();C.busy=true;setTimeout(()=>{C.busy=false;advance()},1300);return}
   const mood=rate(k,card);
   C.played.push(card.id);C.fresh.delete(card.id);
   C.hand[k]=C.hand[k].filter(i=>i!==card.id);C.hand.emg=C.hand.emg.filter(i=>i!==card.id);
@@ -1663,9 +1740,11 @@ function resolve(k,card){
   if(k==='anam'){if(wide)say('vet',card.t,'Você pergunta');setTimeout(()=>say('tutor',card.r,'Tutor(a)'),wide?500:0)}
   if(k==='fis'&&wide)say('vet',card.r,'Achado · '+card.t,true);
   if(k==='tx'){say('vet',card.t+'.','Conduta');if(!card.ok&&cs.decay)loss=10}
+  if(C.phase in C.used)C.used[C.phase]++;
   if(spendTurn(loss))return;
   updAll();
   react(mood,card);
+  checkPhase();
   if(C.stab<before)setTimeout(()=>fx('−'+(before-C.stab)+' vida','#ff8a8a',-70),500);
   if(k==='exm')setTimeout(()=>{if(!C.result)showSlip(card)},650);
 }
@@ -1701,7 +1780,7 @@ function prof(text){
 }
 function askHint(){const C=st.c;if(C.busy||C.result)return;C.hintsAsked++;prof(nextHint());updHud()}
 function swapHand(){
-  const C=st.c,k=C.tab;if(C.busy||k==='dx'||!C.deck[k].length)return;
+  const C=st.c,k=C.tab;if(C.busy||k!==C.phase||k==='dx'||k==='emg'||!C.deck[k].length)return;
   C.deck[k].push(...C.hand[k]);C.hand[k].forEach(i=>C.shown.delete(i));C.hand[k]=[];refill(k);C.sel=null;
   C.log.unshift({k:'swap',card:{t:'Trocou as cartas da mão ('+KIND[k]+')'},turn:C.turns+1});
   if(spendTurn(0))return;updAll();
@@ -1797,7 +1876,8 @@ document.addEventListener('click',e=>{
   else if(act==='tut')tutorial(+v);
   else if(act==='sound')toggleSound();
   else if(act==='mode'){st.mode=v;remember();render()}
-  else if(act==='tab'){st.c.tab=v;st.c.sel=null;updAll()}
+  else if(act==='tab'){if(v===st.c.phase){st.c.tab=v;st.c.sel=null;updAll()}}
+  else if(act==='nextphase'){if(canAdvance())advance()}
   else if(act==='swap')swapHand();
   else if(act==='log')showLog();
   else if(act==='close')$('#overlay').innerHTML='';
@@ -1810,7 +1890,7 @@ document.addEventListener('click',e=>{
   else if(act==='runnext'){st.screen=st.run.scores.length<RUN_SIZE?(st.run.items.length<st.run.scores.length&&st.run.items.length<ITEMS.length?'item':'pick'):'runend';render();window.scrollTo(0,0)}
   else if(act==='newrun')startRun();
   else if(act==='endrun'){st.run=null;st.screen='clinic';render();window.scrollTo(0,0)}
-  else if(act==='finish'){st.c.busy=true;finish()}
+  else if(act==='finish'){if(st.c.busy||st.c.phase!=='tx')return;st.c.busy=true;finish()}
   else if(act==='quit')askQuit();
   else if(act==='quitno'){const q=$('#quitbox');if(q)q.remove()}
   else if(act==='quityes')doQuit();
@@ -1848,10 +1928,10 @@ function vRules(){
    <div class="panel rpanel"><ul class="rl">
     <li><b>Toque numa carta</b> para ver maior e depois em <b>Jogar carta</b>. Cada carta gasta 1 turno.</li>
     <li><b>Paciente instável?</b> Use primeiro a pilha vermelha de <b>Emergência</b>: ele perde vida a cada carta.</li>
-    <li><b>As pilhas são livres.</b> A sugerida balança em amarelo.</li>
+    <li><b>Etapas em ordem.</b> Cada etapa tem um número de cartas; quando acabam, a próxima abre sozinha. Dá para <b>avançar antes</b>.</li>
     <li><b>Travou?</b> Toque em <b>Pedir dica</b> e o professor ajuda.</li>
     <li><b>Plantão:</b> 3 pacientes seguidos, com um <b>item</b> de prêmio entre eles.</li>
-    <li><b>Encerrar</b> mostra o desfecho, o relatório e o XP ganho.</li></ul>
+    <li><b>Conduta</b> é a última etapa: no fim, o paciente recebe alta ou fica internado, e você vê o desfecho.</li></ul>
     <div class="facesrow"><span>A carinha mostra como você está indo:</span><span>${face('feliz')}boa</span><span>${face('serio')}hum…</span><span>${face('triste')}erro</span></div></div>
    <button class="btn" data-act="go" data-v="clinic">Entendi, ir para a clínica</button></section>`;
 }
@@ -1879,8 +1959,8 @@ function vClinic(){
    </div>
    <div class="cright">
     <div class="panel stepbox"><p class="stepn"><span>1</span>Escolha a dificuldade</p><div class="modes">
-     <button class="mode" data-act="mode" data-v="facil" aria-pressed="${st.mode!=='desafio'}"><b>Fácil</b><small>Sem limite de turnos, dicas grátis e mais dinheiro do tutor.</small></button>
-     <button class="mode" data-act="mode" data-v="desafio" aria-pressed="${st.mode==='desafio'}"><b>Desafio</b><small>Turnos limitados e dica custa pontos. Ganha mais XP.</small></button></div></div>
+     <button class="mode" data-act="mode" data-v="facil" aria-pressed="${st.mode!=='desafio'}"><b>Fácil</b><small>Mais cartas em cada etapa, dicas grátis e mais dinheiro do tutor.</small></button>
+     <button class="mode" data-act="mode" data-v="desafio" aria-pressed="${st.mode==='desafio'}"><b>Desafio</b><small>Menos cartas por etapa e dica custa pontos. Ganha mais XP.</small></button></div></div>
     <div class="panel stepbox"><p class="stepn"><span>2</span>Escolha como jogar</p>
      <button class="playopt main" data-act="startrun"><b>Começar plantão</b><small>${RUN_SIZE} pacientes seguidos: você escolhe quem atender e ganha itens entre eles.</small><em>Recomendado</em></button>
      <button class="playopt" data-act="next"><b>Treinar um caso avulso</b><small>1 paciente sorteado, para praticar rápido.</small></button></div>
@@ -1909,26 +1989,27 @@ function vCase(){
    <div class="queixa">${ICON.anam}<div><b>Queixa do tutor</b>“${esc(cs.fala)}”</div></div>
    <div class="clues" id="clues" aria-label="Quadro de pistas"></div>
    <section class="table" aria-label="Suas cartas">
-    <p class="tabletitle">Pilhas livres: toque em qualquer uma</p>
+    <p class="tabletitle" id="tabletitle"></p>
     <div class="decks" role="tablist" id="decks"></div>
     <div class="handbar" id="handbar"></div>
     <div class="hand" id="hand"></div>
    </section>
-   <div class="actions"><button class="btn ghost" data-act="log">Prontuário</button><button class="btn ghost" data-act="hint">Pedir dica</button><button class="btn end" data-act="finish" id="finishBtn">Encerrar</button><button class="btn quit" data-act="quit" aria-label="Desistir: cancelar o atendimento e voltar para a clínica" title="Cancelar o atendimento e voltar para a clínica"><span aria-hidden="true">✕</span><span class="ql"> Desistir</span></button></div>`;
+   <div class="actions"><button class="btn ghost" data-act="log">Prontuário</button><button class="btn ghost" data-act="hint">Pedir dica</button><button class="btn end" data-act="finish" id="finishBtn">Finalizar</button><button class="btn quit" data-act="quit" aria-label="Desistir: cancelar o atendimento e voltar para a clínica" title="Cancelar o atendimento e voltar para a clínica"><span aria-hidden="true">✕</span><span class="ql"> Desistir</span></button></div>`;
 }
 function updAll(){updHud();updHand();updScene();updVitals()}
 function updHud(){
-  const C=st.c,cs=C.cs,pct=Math.round(C.stab),inf=!isFinite(C.maxT),left=inf?Infinity:C.maxT-C.turns,bud=C.budget-C.spent;
+  const C=st.c,cs=C.cs,pct=Math.round(C.stab),pl=phaseLeft(),bud=C.budget-C.spent,p=C.phase||'anam';
   const lv=v=>v>=60?'':v>=30?' mid':' low';
-  const tp=inf?100:Math.round(left/C.maxT*100);
+  const tp=pl===null?100:Math.round(pl/C.lim[p]*100);
   $('#hud').innerHTML=`
    <div class="meter${!C.stabilized&&pct<30?' pulse':''}">${SVG_HEART}<span>${C.stabilized||!cs.decay?'Vida':'Vida ↓'}</span><b>${pct}</b><div class="bar${lv(pct)}"><i style="width:${pct}%"></i></div></div>
-   <div class="meter${left<=3?' pulse':''}">${SVG_HOUR}<span>${inf&&innerWidth>=900?'Turnos · Fácil':'Turnos'}</span><b>${inf?'∞':left}</b><div class="bar${lv(tp)}"><i style="width:${tp}%"></i></div></div>
+   <div class="meter${pl===1?' pulse':''}">${SVG_HOUR}<span>${innerWidth>=900?PNAME[p]+' · restam':'Restam'}</span><b>${pl===null?(p==='dx'?'1 escolha':'—'):pl+' '+(innerWidth>=900?PUNIT[p][pl===1?0:1]:'cartas')}</b><div class="bar${lv(tp)}"><i style="width:${tp}%"></i></div></div>
    <div class="meter">${SVG_COIN}<span>Tutor</span><b>${money(bud)}</b><div class="bar${lv(Math.round(bud/C.budget*100))}"><i style="width:${Math.round(bud/C.budget*100)}%"></i></div></div>
    <div class="dxchip"><span>Hipótese</span><b>${C.dx?esc(cardOf(C.dx)[1].t):'—'}</b></div>
    ${cs.alerta&&!C.stabilized?`<div class="dxchip alarm">${esc(cs.alerta)}</div>`:''}`;
-  const ready=C.dx&&cs.tx.some(c=>C.played.includes(c.id));
-  const fb=$('#finishBtn');fb.disabled=!ready;fb.title=ready?'':'Escolha um diagnóstico e jogue ao menos uma conduta';
+  const fb=$('#finishBtn');
+  if(C.phase==='tx'){const ready=C.used.tx>0;fb.dataset.act='finish';fb.textContent='Finalizar';fb.classList.add('end');fb.classList.remove('adv');fb.disabled=!ready;fb.title=ready?'Encerrar a conduta e ver como o paciente evolui':'Jogue ao menos uma conduta'}
+  else{const ok=canAdvance()||(C.phase&&C.phase!=='emg'&&C.phase!=='dx');fb.dataset.act='nextphase';fb.classList.remove('end');fb.classList.add('adv');fb.innerHTML=innerWidth>=900?'Próxima etapa →':'Avançar →';fb.disabled=!ok;fb.title=C.phase==='emg'?'Estabilize o paciente primeiro':C.phase==='dx'?'Escolha um diagnóstico':'Encerrar esta etapa antes de usar todas as cartas'}
 }
 function updScene(){
   const C=st.c,pet=$('#pet');
@@ -1956,22 +2037,23 @@ function nextStep(){
 }
 function updHand(){
   const C=st.c,cs=C.cs,k=C.tab;
-  const cnt=t=>t==='dx'?(C.dx?'✓':''):t==='emg'?(C.stabilized?'✓':''):C.played.filter(id=>cs[t].some(z=>z.id===id)).length||'';
-  const nx=nextStep();
+  const order=['emg','anam','fis','exm','dx','tx'],cur=order.indexOf(C.phase);
+  const cnt=t=>{const i=order.indexOf(t);if(i<cur)return '✓';if(t===C.phase&&t in C.lim)return C.used[t]+'/'+C.lim[t];return ''};
+  const nx=null;
   const SHORT=innerWidth<430?{emg:'Emerg.',anam:'Anamn.',fis:'Físico',exm:'Lab.',dx:'Diagn.',tx:'Conduta'}:{emg:'Emergência',anam:'Anamnese',fis:'Ex. físico',exm:'Laboratório',dx:'Diagnóstico',tx:'Conduta'};
   const piles=C.emgOn?[['emg','Emergência'],...PH]:PH;
   $('#decks').style.gridTemplateColumns=`repeat(${piles.length},minmax(0,1fr))`;
   $('#decks').innerHTML=piles.map(([t,l],i)=>{const n=C.emgOn?i:i+1;
-    const lab=t==='emg'?(C.stabilized?'estável ✓':'urgente!'):nx===t&&k!==t?'próxima!':'etapa '+n;
-    return `<button class="deck s-${t}${nx===t&&k!==t?' next':''}${t==='emg'&&!C.stabilized?' alarm':''}" role="tab" aria-selected="${k===t}" aria-label="${t==='emg'?'Emergência':'Etapa '+n+': '+l}" data-act="tab" data-v="${t}">
-    <span class="back"><i>${ICON[t]}</i></span><span class="lb">${SHORT[t]}</span><span class="st${t==='emg'&&!C.stabilized||nx===t&&k!==t?' flag':''}">${lab}</span><span class="n">${cnt(t)}</span></button>`}).join('');
+    const oi=order.indexOf(t),state=oi<cur?'done':oi===cur?'now':'lock';
+    const lab=state==='done'?'feito':state==='now'?'agora':t==='emg'?'urgente!':'etapa '+n;
+    return `<button class="deck s-${t} ${state}${t==='emg'&&state==='now'?' alarm':''}" role="tab" aria-selected="${state==='now'}" aria-disabled="${state!=='now'}" aria-label="${(t==='emg'?'Emergência':'Etapa '+n+': '+l)+(state==='done'?', concluída':state==='lock'?', bloqueada':', atual')}" data-act="tab" data-v="${t}">
+    <span class="back"><i>${ICON[t]}</i></span><span class="lb">${SHORT[t]}</span><span class="st${state==='now'?' flag':''}">${lab}</span><span class="n">${cnt(t)}</span></button>`}).join('');
+  const tt=$('#tabletitle');if(tt)tt.textContent=C.phase?(C.phase==='emg'?'Primeiro: estabilize o paciente':'Etapa atual: '+PNAME[C.phase]+' · as próximas abrem sozinhas'):'Faça a triagem para começar';
   const ids=C.hand[k];
-  if(nx&&nx!==k&&phaseDone(k)){
-    const lbl=nx==='emg'?'Emergência':PH.find(p=>p[0]===nx)[1];
-    $('#handbar').innerHTML=`<div class="stepnote" style="flex:1"><span>${nx==='emg'?'Estabilize primeiro!':nx==='tx'&&!phaseDone('dx')?'Hora de tratar!':'Boa! Próxima etapa:'}</span><button data-act="tab" data-v="${nx}">${esc(lbl)} →</button></div>`;
-  }else{
-    const hint=k==='emg'?(C.stabilized?'Paciente estável. Siga a consulta pelas outras pilhas.':'Escolha o que salva o paciente agora.'):k==='dx'?'Escolha a doença. Não gasta turno.':k==='tx'?'Jogue as condutas na ordem certa.':k==='exm'?'Exames gastam o dinheiro do tutor.':k==='fis'?'Toque numa carta para examinar.':'Toque numa carta para perguntar.';
-    $('#handbar').innerHTML=`<span class="hint">${hint}</span>${k!=='dx'&&C.deck[k]&&C.deck[k].length?`<button class="linkbtn" data-act="swap">Trocar (${C.deck[k].length}) · 1 turno</button>`:''}`;
+  {
+    const pl=phaseLeft(),cnt2=pl===null?'':` · restam ${pl} ${PUNIT[k]?PUNIT[k][pl===1?0:1]:''}`;
+    const hint=!C.phase?'Faça a triagem primeiro.':k==='emg'?'Escolha o que salva o paciente agora.':k==='dx'?'Escolha 1 diagnóstico. Não gasta turno.':k==='tx'?'Jogue as condutas na ordem certa'+cnt2+'.':k==='exm'?'Exames gastam dinheiro do tutor'+cnt2+'.':k==='fis'?'Toque numa carta para examinar'+cnt2+'.':'Toque numa carta para perguntar'+cnt2+'.';
+    $('#handbar').innerHTML=`<span class="hint">${hint}</span>${C.phase===k&&k!=='dx'&&k!=='emg'&&C.deck[k]&&C.deck[k].length?`<button class="linkbtn" data-act="swap">Trocar (${C.deck[k].length}) · 1 turno</button>`:''}`;
   }
   const hand=$('#hand');
   if(!ids.length){hand.innerHTML=`<div class="empty">Você já jogou todas as cartas de ${KIND[k].toLowerCase()}.</div>`;return}
@@ -1992,6 +2074,18 @@ function updHand(){
       style="--x:${(o*step).toFixed(1)}px;--y:${(Math.pow(Math.abs(o),1.5)*3).toFixed(1)}px;--r:${(o*rot).toFixed(1)}deg;--hx:${hx.toFixed(1)}px;--z:${i+1};--d:${d}">
       ${tcgHTML(ck,c,k==='emg'?'urgent':'',isNew?'':'animation:none')}</button>`}).join('');
 }
+function destinoHTML(){
+  const C=st.c,cs=C.cs,g=C.result.g,d=DESTINO[cs.id],n=cs.nome;
+  let ic,t,s;
+  if(C.dead){ic='✝';t='Óbito durante o atendimento';s=`${n} não resistiu antes de ser estabilizado.`}
+  else if(d){ic='🏥';
+    t={bom:`Internado por ${d} dias · alta`,ressalva:`Internado por ${d+2} dias · alta com cuidados`,ruim:'Internado · piorou',obito:'Internado · óbito na internação'}[g];
+    s={bom:`Com a sua conduta, ${n} ficou ${d} dias internado, se recuperou e foi para casa.`,ressalva:`${n} precisou de mais tempo internado do que o ideal, mas recebeu alta. Vai precisar de retorno.`,ruim:`${n} ficou internado, mas a conduta não foi suficiente e o quadro piorou.`,obito:`${n} foi internado, mas não resistiu durante a internação.`}[g]}
+  else{ic='🏠';
+    t={bom:'Liberado · tratamento em casa',ressalva:'Liberado · precisa de retorno',ruim:'Liberado · piorou em casa',obito:'Liberado · óbito em casa'}[g];
+    s={bom:`${n} não precisou ficar internado: foi liberado com o tratamento certo e voltou bem no retorno.`,ressalva:`${n} foi liberado para casa, mas o tratamento precisa de ajustes no retorno.`,ruim:`${n} foi liberado, mas piorou em casa e voltou à clínica.`,obito:`${n} foi liberado e não resistiu.`}[g]}
+  return `<div class="destino g-${g}"><span class="di" aria-hidden="true">${ic}</span><div><b>${esc(t)}</b><small>${esc(s)}</small></div></div>`;
+}
 function vResult(){
   const C=st.c,cs=C.cs,r=C.result,P=r.P;
   const essMissed=[],hits=[],warns=[];
@@ -2008,7 +2102,7 @@ function vResult(){
   return `<section class="cover"><article class="report">
    <div class="hd"><span>Relatório do plantão</span><span>${esc(cs.nome)} · ${esc(cs.doenca)}</span></div>
    <div class="stars">${[1,2,3].map(i=>STAR(i<=r.stars)).join('')}</div>
-   <span class="stamp g-${r.g}">${G[r.g]}</span><p class="verdict">${esc(r.txt)}</p>
+   <span class="stamp g-${r.g}">${G[r.g]}</span>${destinoHTML()}<p class="verdict">${esc(r.txt)}</p>
    ${C.award?`<div class="xpbox${C.award.up?' up':''}"><div class="xprow"><span class="lvlnum">${C.award.after.i+1}</span><div style="min-width:0;flex:1"><b>${esc(C.award.after.name)}</b><div class="xpbar"><i style="width:${C.award.after.pct}%"></i></div></div><span class="gain">+${C.award.gain} XP</span></div>
     ${C.award.up?'<p class="levelup">Subiu de nível!</p>':''}${C.award.got.length?`<p class="eyebrow">Nova conquista!</p><div class="medals">${C.award.got.map(id=>badgeHTML(id,true,true)).join('')}</div>`:''}</div>`:''}
    <div class="sect"><p class="eyebrow">Decisão-chave do caso</p><p><b>${esc(cs.key)}</b></p></div>
