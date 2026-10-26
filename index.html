@@ -1,0 +1,1904 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Jogo de cartas de endocrinologia gastrointestinal veterinária.">
+<meta name="theme-color" content="#1d5f86">
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<title>Plantão Endócrino Vet 2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;800;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: jogo de cartas em uma coluna — HUD de jogo, cena do consultório, mesa de feltro com pilhas e mão em leque. Visual único, colorido e "cartoon" (contorno escuro + sombra sólida). */
+:root{
+  color-scheme:light;
+  --night:#1b2340; --ink:#1b2340; --muted:#5b6283; --cream:#fff7e6; --surface:#fff7e6; --line:#e3d6b8;
+  --gold:#ffc83d; --gold-d:#d48b0b; --coral:#ff6b6b; --mint:#2fcf8f; --sky:#5bc0ff;
+  --scrub:#12a08f; --scrub-ink:#fff; --scrub-soft:#d4f4ee;
+  --amber:#e08a00; --danger:#e8414f; --ok:#22a861;
+  --s-anam:#3d8bff; --s-fis:#1fb07a; --s-exm:#9b5cff; --s-dx:#ff9a1f; --s-tx:#ff4d6d;
+  --f-display:"Lilita One","Arial Rounded MT Bold",ui-rounded,system-ui,sans-serif;
+  --f-body:"Nunito",ui-rounded,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --pop:0 5px 0 var(--night);
+}
+*{box-sizing:border-box}
+html{background:#24306b}
+body{color:var(--cream);font-family:var(--f-body);font-weight:600;font-size:16px;line-height:1.45;min-height:100%;
+  background:
+   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90' viewBox='0 0 90 90'%3E%3Cg fill='%23ffffff' fill-opacity='.05'%3E%3Cellipse cx='22' cy='30' rx='7' ry='6'/%3E%3Ccircle cx='13' cy='20' r='3'/%3E%3Ccircle cx='19' cy='15' r='3'/%3E%3Ccircle cx='26' cy='15' r='3'/%3E%3Ccircle cx='32' cy='20' r='3'/%3E%3Cellipse cx='67' cy='75' rx='7' ry='6'/%3E%3Ccircle cx='58' cy='65' r='3'/%3E%3Ccircle cx='64' cy='60' r='3'/%3E%3Ccircle cx='71' cy='60' r='3'/%3E%3Ccircle cx='77' cy='65' r='3'/%3E%3C/g%3E%3C/svg%3E"),
+   radial-gradient(120% 60% at 10% 0%,#2fb7a6 0%,transparent 55%),
+   radial-gradient(90% 60% at 100% 30%,#7a4fd6 0%,transparent 60%),
+   linear-gradient(170deg,#1d5f86 0%,#24306b 60%,#2a1f5c 100%);
+  background-attachment:fixed;
+  padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:#1d5f86}
+.app{max-width:760px;margin:0 auto;padding-block:12px 40px;display:flex;flex-direction:column;gap:12px}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0;line-height:1.05;letter-spacing:.01em}
+h1{font-size:clamp(2.4rem,11vw,3.8rem)}
+h2{font-size:1.6rem} h3{font-size:1.15rem}
+p{margin:0}
+.muted{color:var(--muted)}
+.eyebrow{font-family:var(--f-display);font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.btn{font-family:var(--f-display);font-size:1.1rem;letter-spacing:.02em;border:3px solid var(--night);border-radius:14px;padding:10px 18px;min-height:50px;
+  background:linear-gradient(#ffd85c,var(--gold) 55%,#f2a91c);color:var(--night);box-shadow:var(--pop),inset 0 3px 0 rgba(255,255,255,.6);transition:transform .08s}
+.btn:hover:not(:disabled){transform:translateY(-2px)}
+.btn:active:not(:disabled){transform:translateY(4px);box-shadow:0 1px 0 var(--night),inset 0 3px 0 rgba(255,255,255,.6)}
+.btn:disabled{filter:grayscale(.8) brightness(.85);opacity:.7;cursor:not-allowed}
+.btn.ghost{background:linear-gradient(#5fe0cf,var(--scrub));color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+.btn.small{min-height:38px;padding:6px 12px;font-size:.95rem}
+:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.panel{background:var(--cream);color:var(--ink);border:3px solid var(--night);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--pop)}
+.panel .eyebrow{color:var(--gold-d)}
+input[type=text]{width:100%;font:inherit;font-weight:800;padding:14px;border-radius:12px;border:3px solid var(--night);background:#fff;color:var(--ink)}
+
+/* ---------- cena ---------- */
+.stage{position:relative;border-radius:20px;overflow:hidden;border:3px solid var(--night);background:#dcefe9;box-shadow:var(--pop)}
+.stage svg.scene{display:block;width:100%;height:auto}
+.bubble{position:absolute;max-width:40%;background:#fff;color:var(--ink);border:2.5px solid var(--night);border-radius:14px;padding:6px 9px;font-size:clamp(.72rem,2.6vw,.92rem);font-weight:800;line-height:1.25;
+  box-shadow:0 3px 0 var(--night);opacity:0;transform:translateY(6px) scale(.9);transition:opacity .2s,transform .25s cubic-bezier(.2,1.6,.4,1);pointer-events:none}
+.bubble.on{opacity:1;transform:none}
+.bubble small{display:block;font-family:var(--f-display);font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--s-anam)}
+.bubble::after{content:"";position:absolute;bottom:-10px;width:15px;height:15px;background:inherit;border-right:2.5px solid var(--night);border-bottom:2.5px solid var(--night);transform:rotate(45deg)}
+.bubble.tutor{right:2.5%;top:3%} .bubble.tutor::after{right:18%}
+.bubble.vet{left:2.5%;top:3%;background:#eafff9} .bubble.vet::after{left:14%}
+.bubble.vet small{color:var(--s-fis)}
+.tag{position:absolute;left:50%;bottom:5%;transform:translateX(-50%);background:var(--night);color:#fff;border-radius:999px;padding:3px 12px;font-size:.74rem;font-weight:800;white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis}
+.pet-body{transform-box:fill-box;transform-origin:50% 100%;animation:breath 3.2s ease-in-out infinite}
+.pet-tail{transform-box:fill-box;transform-origin:0% 100%;animation:wag 1.4s ease-in-out infinite}
+.cat .pet-tail{animation:sway 3.6s ease-in-out infinite}
+.pet-head{transform-box:fill-box;transform-origin:70% 95%;transition:transform .8s ease;animation:look 7s ease-in-out infinite}
+.eye{transform-box:fill-box;transform-origin:50% 50%;animation:blink 4.6s infinite}
+.sick .pet-body{animation-duration:1.1s}
+.sick .pet-head{animation:none;transform:rotate(16deg) translateY(5px)}
+.sick .pet-tail{animation:none}
+.sick .eye{animation:blink 2s infinite}
+.person{transform-box:fill-box;transform-origin:50% 100%;animation:idle 4s ease-in-out infinite}
+.mouth{transform-box:fill-box;transform-origin:50% 50%}
+.talking .mouth{animation:talk .22s ease-in-out infinite alternate}
+.enter{animation:enter .9s cubic-bezier(.2,.8,.2,1) both}
+.enter2{animation:enter 1s .15s cubic-bezier(.2,.8,.2,1) both}
+.ecg-line{stroke-dasharray:90 260;animation:sweep 1.6s linear infinite}
+.crit .ecg-line{stroke:#ff6b5b;animation-duration:.8s}
+.sec{transform-box:view-box;transform-origin:352px 38px;animation:spin 60s linear infinite}
+.iv{opacity:0;transition:opacity .6s}.iv.on{opacity:1}
+.drip{animation:drip 1.2s ease-in infinite}
+.mood{transform-box:fill-box;transform-origin:50% 100%;opacity:0}
+.mood.on{animation:moodpop 2.6s ease both}
+.stage.hit{animation:shake .4s}
+.fx{position:absolute;left:50%;top:34%;z-index:6;pointer-events:none;font-family:var(--f-display);font-size:clamp(1.3rem,6vw,2rem);white-space:nowrap;color:var(--c,#fff);
+  -webkit-text-stroke:2px var(--night);paint-order:stroke fill;text-shadow:0 4px 0 var(--night);animation:fxup 1.4s cubic-bezier(.2,.8,.2,1) forwards}
+.spark{position:absolute;left:50%;top:48%;z-index:5;width:14px;height:14px;pointer-events:none;color:var(--c,#ffd36b);animation:spark .8s ease-out forwards}
+.spark svg{width:100%;height:100%}
+.ring{position:absolute;left:50%;top:48%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border:5px solid var(--c,#ffd36b);z-index:5;pointer-events:none;animation:ring .6s ease-out forwards}
+@keyframes breath{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.045)}}
+@keyframes wag{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(14deg)}}
+@keyframes sway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(8deg)}}
+@keyframes look{0%,40%,100%{transform:rotate(0)}50%,70%{transform:rotate(-6deg)}}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@keyframes idle{0%,100%{transform:rotate(0)}50%{transform:rotate(1.2deg)}}
+@keyframes talk{from{transform:scaleY(.5)}to{transform:scaleY(1.8)}}
+@keyframes enter{from{transform:translateX(160px);opacity:0}to{transform:none;opacity:1}}
+@keyframes sweep{from{stroke-dashoffset:350}to{stroke-dashoffset:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes drip{0%{transform:translateY(0);opacity:1}100%{transform:translateY(10px);opacity:0}}
+@keyframes moodpop{0%{opacity:0;transform:translateY(10px) scale(.4)}12%{opacity:1;transform:translateY(0) scale(1.2)}20%{transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-8px)}}
+@keyframes fxup{0%{transform:translate(-50%,10px) scale(.4);opacity:0}15%{transform:translate(-50%,0) scale(1.25);opacity:1}30%{transform:translate(-50%,-6px) scale(1)}100%{transform:translate(-50%,-70px) scale(1);opacity:0}}
+@keyframes spark{0%{transform:translate(-50%,-50%) scale(.3);opacity:1}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1) rotate(160deg);opacity:0}}
+@keyframes ring{from{transform:scale(.3);opacity:1}to{transform:scale(5);opacity:0}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+
+/* ---------- HUD ---------- */
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:8;padding-block:6px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;
+  background:linear-gradient(#1d5f86 70%,transparent)}
+.meter{position:relative;background:var(--night);border:3px solid #0d1226;border-radius:14px;padding:5px 8px 6px 40px;min-width:0;box-shadow:0 3px 0 #0d1226;color:#fff}
+.meter .ico{position:absolute;left:4px;top:50%;transform:translateY(-50%);width:32px;height:32px}
+.meter span{display:block;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;font-weight:900;color:#aeb6dd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meter b{font-family:var(--f-display);font-weight:400;font-size:1.15rem;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar{height:7px;border-radius:99px;background:rgba(255,255,255,.15);overflow:hidden;margin-top:3px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#2fcf8f,#7ef0b9);transition:width .5s}
+.bar.mid i{background:linear-gradient(90deg,#ffb020,#ffd36b)} .bar.low i{background:linear-gradient(90deg,#e8414f,#ff8a8a)}
+.meter.pulse{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{border-color:var(--danger);box-shadow:0 0 0 4px rgba(232,65,79,.4),0 3px 0 #0d1226}}
+.dxchip{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.82rem;font-weight:800;background:var(--cream);color:var(--ink);border:3px solid var(--night);border-radius:12px;padding:5px 10px}
+.dxchip b{font-family:var(--f-display);font-weight:400;color:var(--gold-d);text-align:right}
+.dxchip.alarm{background:#ffe1e3;color:var(--danger);animation:pulse 1.2s infinite}
+
+/* ---------- mesa e pilhas ---------- */
+.table{position:relative;background:radial-gradient(120% 90% at 50% 0%,#2c8a6f,#1b5e4c 70%,#154a3c);border-radius:22px;padding:10px 10px 0;color:#eafff6;display:flex;flex-direction:column;gap:8px;overflow:hidden;
+  border:7px solid #9a5f2b;box-shadow:inset 0 0 0 3px #5e3615,inset 0 0 40px rgba(0,0,0,.35),0 0 0 3px var(--night),0 8px 0 var(--night)}
+.decks{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding-top:8px}
+.deck{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:0;border:0;background:none;color:#eafff6;min-width:0;font-weight:900;font-size:.66rem;line-height:1.1}
+.deck .back{position:relative;width:100%;max-width:62px;aspect-ratio:5/6.4;border-radius:8px;border:2.5px solid var(--night);display:grid;place-items:center;
+  background:repeating-linear-gradient(45deg,rgba(255,255,255,.14) 0 4px,transparent 4px 9px),linear-gradient(160deg,color-mix(in srgb,var(--suit) 60%,#fff),var(--suit) 55%,color-mix(in srgb,var(--suit) 70%,#000));
+  box-shadow:3px 3px 0 -1px color-mix(in srgb,var(--suit) 50%,#000),3px 3px 0 1px var(--night),0 4px 0 1px rgba(0,0,0,.25);transition:transform .2s}
+.deck .back i{width:62%;aspect-ratio:1;border-radius:50%;background:#fff;border:2.5px solid var(--night);display:grid;place-items:center;color:var(--suit)}
+.deck .back i svg{width:62%;height:62%}
+.deck .lb{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.deck .st{font-family:var(--f-display);font-weight:400;font-size:.66rem;opacity:.75;letter-spacing:.04em}
+.deck .n{position:absolute;top:-6px;right:0;min-width:20px;height:20px;border-radius:99px;background:var(--gold);color:var(--night);border:2px solid var(--night);font-family:var(--f-display);font-size:.72rem;display:grid;place-items:center;padding:0 4px;z-index:2}
+.deck .n:empty{display:none}
+.deck[aria-selected="true"] .back{transform:translateY(-5px);box-shadow:3px 3px 0 -1px color-mix(in srgb,var(--suit) 50%,#000),3px 3px 0 1px var(--night),0 0 0 4px #fff,0 0 18px 4px rgba(255,255,255,.5)}
+.deck[aria-selected="true"] .lb{color:#fff;text-shadow:0 0 8px rgba(255,255,255,.6)}
+.deck.next .back{animation:nudge 1.1s ease-in-out infinite}
+.deck.next .st{opacity:1;color:#ffd36b}
+@keyframes nudge{0%,100%{transform:translateY(0) rotate(0)}30%{transform:translateY(-6px) rotate(-4deg)}60%{transform:translateY(-3px) rotate(3deg)}}
+.handbar{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.8rem;min-height:34px}
+.handbar .hint{opacity:.9;min-width:0;font-weight:800}
+.linkbtn{background:rgba(0,0,0,.25);border:2px solid rgba(255,255,255,.4);border-radius:10px;color:#eafff6;padding:5px 9px;font-size:.74rem;font-weight:900;white-space:nowrap}
+.stepnote{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--gold);color:var(--night);border:3px solid var(--night);border-radius:12px;padding:5px 5px 5px 12px;font-size:.88rem;font-weight:900;box-shadow:0 3px 0 var(--night);animation:pop .35s cubic-bezier(.2,1.6,.4,1)}
+.stepnote button{border:2px solid var(--night);background:var(--night);color:#fff;border-radius:9px;padding:6px 10px;font-family:var(--f-display);font-size:.9rem;white-space:nowrap}
+@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:none;opacity:1}}
+
+/* ---------- cartas (estilo TCG) ---------- */
+.s-anam{--suit:var(--s-anam)} .s-fis{--suit:var(--s-fis)} .s-exm{--suit:var(--s-exm)} .s-dx{--suit:var(--s-dx)} .s-tx{--suit:var(--s-tx)}
+.hand{position:relative;height:236px;touch-action:manipulation}
+.pcard{position:absolute;left:50%;bottom:22px;width:116px;height:164px;margin-left:-58px;padding:0;border:0;background:none;
+  transform:translateX(var(--x)) translateY(var(--y)) rotate(var(--r));transform-origin:50% 130%;transition:transform .35s cubic-bezier(.2,.8,.2,1);z-index:var(--z)}
+.tcg{position:absolute;inset:0;border-radius:12px;padding:5px;display:flex;flex-direction:column;gap:4px;overflow:hidden;color:var(--night);text-align:left;
+  background:radial-gradient(circle at 20% 0%,rgba(255,255,255,.45),transparent 40%),linear-gradient(150deg,color-mix(in srgb,var(--suit) 55%,#fff),var(--suit) 45%,color-mix(in srgb,var(--suit) 65%,#000));
+  border:2.5px solid var(--night);box-shadow:0 10px 16px -8px rgba(0,0,0,.7);transition:transform .2s ease}
+.pcard .tcg{animation:deal .45s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:var(--d)}
+.tcg .top{display:flex;align-items:center;gap:4px;min-height:20px}
+.tcg .gem{flex:0 0 auto;width:24px;height:24px;margin:-3px 0 0 -3px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-size:.9rem;color:var(--night);
+  background:radial-gradient(circle at 35% 30%,#fff 0 12%,#ffe58a 30%,var(--gold) 60%,var(--gold-d));border:2.5px solid var(--night);box-shadow:0 2px 0 rgba(0,0,0,.3)}
+.tcg .gem.zero{background:radial-gradient(circle at 35% 30%,#fff 0 12%,#cfe9ff 35%,#7cc4ff 65%,#3d8bff)}
+.tcg .type{flex:1;min-width:0;font-family:var(--f-display);font-size:.6rem;letter-spacing:.05em;text-transform:uppercase;color:#fff;-webkit-text-stroke:.6px var(--night);paint-order:stroke fill;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tcg .coin{flex:0 0 auto;font-family:var(--f-display);font-size:.62rem;background:linear-gradient(#fff3c4,#ffd970);border:2px solid var(--night);border-radius:99px;padding:0 5px;line-height:1.4}
+.tcg .art{position:relative;flex:0 0 40%;border-radius:8px;border:2.5px solid var(--night);overflow:hidden;background:#fff;box-shadow:inset 0 0 0 2px rgba(255,255,255,.6)}
+.tcg .art svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.tcg .name{flex:1;min-height:0;background:var(--cream);border:2.5px solid var(--night);border-radius:8px;padding:3px 5px;font-weight:900;font-size:.68rem;line-height:1.15;
+  display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+.tcg .name span{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.tcg .txt,.tcg .flavor{display:none}
+.tcg::after{content:"";position:absolute;inset:-20%;pointer-events:none;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.65) 47%,rgba(180,255,240,.4) 52%,transparent 62%);transform:translateX(-110%)}
+.pcard:hover .tcg::after,.pcard.new .tcg::after{animation:shine 1.1s ease}
+@keyframes shine{to{transform:translateX(110%)}}
+@keyframes deal{from{transform:translateY(140px) rotate(18deg);opacity:0}to{transform:none;opacity:1}}
+@media (hover:hover) and (pointer:fine){.pcard:hover{z-index:35}.pcard:hover .tcg{transform:translate(var(--hx,0px),-58px) rotate(calc(var(--r) * -1)) scale(1.22);box-shadow:0 24px 30px -12px rgba(0,0,0,.8),0 0 0 3px #fff}}
+.pcard .s-exm .type,.fan .s-exm .type{display:none}
+.pcard.broke .tcg{filter:grayscale(1) brightness(.85)}
+.pcard.chosen .tcg{box-shadow:0 0 0 3px #fff,0 0 20px 6px var(--gold)}
+.pcard.chosen .tcg .art::after{content:"ESCOLHIDO";position:absolute;inset:auto 0 30% 0;margin:auto;width:max-content;transform:rotate(-12deg);background:var(--gold);border:2px solid var(--night);font-family:var(--f-display);font-size:.62rem;padding:1px 6px;border-radius:4px}
+.pcard.new::before{content:"NOVA!";position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(var(--r));z-index:3;background:var(--coral);color:#fff;border:2px solid var(--night);font-family:var(--f-display);font-size:.62rem;padding:1px 8px;border-radius:99px;animation:pop .4s .3s backwards}
+.pcard.fly{transition:transform .5s cubic-bezier(.5,0,.8,.4),opacity .5s;transform:translateX(0) translateY(-340px) rotate(-14deg) scale(.6);opacity:0;z-index:40}
+.empty{display:grid;place-items:center;height:100%;text-align:center;opacity:.85;font-size:.9rem;font-weight:800;padding:0 20px}
+
+/* carta grande */
+.zoomwrap{display:flex;flex-direction:column;align-items:center;gap:16px;width:min(320px,100%)}
+.bigtcg{position:relative;width:min(280px,74vw);aspect-ratio:5/7;animation:zoomin .35s cubic-bezier(.2,1.3,.4,1)}
+.bigtcg .tcg{padding:10px;gap:7px;border-width:4px;border-radius:20px;box-shadow:0 30px 60px -20px rgba(0,0,0,.9),0 0 0 3px rgba(255,255,255,.35)}
+.bigtcg .tcg::after{animation:shine 2.6s ease-in-out infinite}
+.bigtcg .gem{width:42px;height:42px;font-size:1.45rem;border-width:3px;margin:-4px 0 0 -4px}
+.bigtcg .type{font-size:.95rem;-webkit-text-stroke:1px var(--night)}
+.bigtcg .coin{font-size:.9rem;padding:1px 8px}
+.bigtcg .art{flex:0 0 46%;border-width:3px;border-radius:12px}
+.bigtcg .name{flex:0 0 auto;font-family:var(--f-display);font-weight:400;font-size:1.22rem;letter-spacing:.01em;padding:7px 8px;border-width:3px;border-radius:10px}
+.bigtcg .name span{-webkit-line-clamp:5}
+.bigtcg .txt{display:block;flex:1;background:rgba(255,255,255,.88);border:2.5px solid var(--night);border-radius:10px;padding:7px 9px;font-size:.84rem;font-weight:800;line-height:1.3}
+.bigtcg .flavor{display:block;font-style:italic;font-weight:600;color:var(--muted);margin-top:4px;font-size:.78rem}
+.zoomwrap .row{justify-content:center;width:100%}.zoomwrap .row .btn{flex:1}
+.zoomwrap .warn{background:var(--danger);color:#fff;border:3px solid var(--night);border-radius:12px;padding:6px 12px;font-weight:900;text-align:center}
+@keyframes zoomin{from{transform:scale(.5) rotate(-10deg) translateY(80px);opacity:0}to{transform:none;opacity:1}}
+
+.actions{display:flex;gap:8px}
+.actions .btn{flex:1;font-size:1rem;padding-inline:8px}
+.actions .btn.end{flex:1.6;background:linear-gradient(#ff8f9f,#ff4d6d 55%,#d8304f);color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.3)}
+
+/* ---------- quadros: queixa, professor ---------- */
+.queixa{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;background:var(--cream);color:var(--ink);border:3px solid var(--night);border-radius:14px;padding:8px 12px;font-size:.92rem;font-weight:800;box-shadow:0 4px 0 var(--night)}
+.queixa b{display:block;font-family:var(--f-display);font-weight:400;font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;color:var(--s-anam)}
+.queixa svg{width:22px;height:22px;color:var(--s-anam);margin-top:2px}
+.profbar{display:grid;grid-template-columns:48px 1fr;gap:10px;align-items:center;background:#fff1c2;color:var(--ink);border:3px solid var(--night);border-radius:14px;padding:6px 12px 6px 6px;font-size:.92rem;font-weight:800;min-height:58px;box-shadow:0 4px 0 var(--night)}
+.profbar .hd{width:48px;height:48px;border-radius:12px;background:#ffd970;border:2.5px solid var(--night);overflow:hidden}
+.profbar .hd svg{width:100%;height:100%;display:block}
+.profbar b{display:block;font-family:var(--f-display);font-weight:400;font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold-d)}
+.profbar.flash{animation:flash .6s ease}
+@keyframes flash{0%{transform:scale(.96) rotate(-1deg);background:#ffd970}100%{transform:none;background:#fff1c2}}
+
+/* ---------- laudo e prontuário ---------- */
+.overlay{position:fixed;inset:0;z-index:60;background:rgba(13,18,38,.72);backdrop-filter:blur(3px);display:grid;place-items:center;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.slip{width:min(440px,100%);max-height:100%;overflow:auto;background:#fffdf3;color:var(--ink);border:3px solid var(--night);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;
+  background-image:repeating-linear-gradient(#fffdf3,#fffdf3 27px,#ece3c8 28px);box-shadow:0 8px 0 var(--night);animation:slide .4s cubic-bezier(.2,1.3,.4,1)}
+.slip .hd{display:flex;justify-content:space-between;gap:10px;border-bottom:3px solid var(--night);padding-bottom:8px;font-family:var(--f-mono);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.slip .eyebrow{color:var(--s-exm)}
+.slip .res{font-family:var(--f-mono);font-size:.95rem;font-weight:700;line-height:1.75;white-space:pre-line}
+.log{display:flex;flex-direction:column;gap:10px}
+.log .e{display:grid;grid-template-columns:26px 1fr;gap:8px;font-size:.9rem}
+.log .e .i{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);padding-top:2px}
+.log .e .q{font-weight:900}
+.mono{font-family:var(--f-mono);font-size:.82rem}
+@keyframes slide{from{transform:translateY(60px) rotate(3deg);opacity:0}to{transform:none;opacity:1}}
+
+/* ---------- capa, personagem, regras ---------- */
+.cover{display:flex;flex-direction:column;gap:14px}
+.logo{text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:6px}
+.logo h1{color:var(--gold);-webkit-text-stroke:3px var(--night);paint-order:stroke fill;text-shadow:0 6px 0 var(--night);transform:rotate(-2deg)}
+.logo h1 span{display:block;color:#7ef0d9;font-size:.62em}
+.badge{display:inline-flex;align-self:center;border-radius:999px;padding:4px 12px;font-size:.8rem;font-weight:900;background:var(--night);color:var(--gold);border:2px solid var(--gold)}
+.fan{position:relative;height:200px;margin:4px auto 0;width:100%;max-width:360px}
+.fan .bigtcg{position:absolute;left:50%;top:6px;width:120px;margin-left:-60px;animation:float 4s ease-in-out infinite}
+.fan .bigtcg .tcg{padding:6px;gap:4px;border-width:2.5px;border-radius:12px}
+.fan .bigtcg .gem{width:24px;height:24px;font-size:.9rem;border-width:2.5px}
+.fan .bigtcg .type{font-size:.6rem;-webkit-text-stroke:.6px var(--night)}
+.fan .bigtcg .name{font-size:.72rem;padding:3px 5px;border-width:2.5px}
+.fan .bigtcg .txt{display:none}
+.fan .c1{transform:translateX(-92px) rotate(-14deg);animation-delay:-1s}
+.fan .c3{transform:translateX(92px) rotate(14deg);animation-delay:-2s}
+.fan .c2{z-index:2}
+@keyframes float{0%,100%{translate:0 0}50%{translate:0 -8px}}
+.intro{color:#eafff6;text-align:center;font-weight:700}
+.avatars{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.choice{background:var(--cream);color:var(--ink);border:3px solid var(--night);border-radius:18px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:var(--f-display);font-size:1.1rem;box-shadow:var(--pop);transition:transform .15s}
+.choice[aria-pressed="true"]{background:#d4f4ee;transform:translateY(-4px);box-shadow:0 9px 0 var(--night),0 0 0 4px var(--gold)}
+.choice svg{width:100%;max-width:150px;height:auto}
+.rules{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.rules li{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;background:var(--cream);color:var(--ink);border:3px solid var(--night);border-radius:14px;padding:8px 12px;font-weight:700;box-shadow:0 3px 0 var(--night)}
+.rules .ic{width:44px;height:52px;border-radius:8px;border:2.5px solid var(--night);display:grid;place-items:center;color:#fff;
+  background:repeating-linear-gradient(45deg,rgba(255,255,255,.18) 0 4px,transparent 4px 9px),var(--suit)}
+.rules .ic svg{width:24px;height:24px}
+.rules b{display:block;font-family:var(--f-display);font-weight:400;font-size:1.05rem}
+ul.list,ol.ideal{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.faces{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.faces div{background:#fff;border:2.5px solid var(--night);border-radius:12px;padding:8px;text-align:center;font-size:.8rem;font-weight:800}
+.faces svg{width:36px;height:36px;display:block;margin:0 auto 4px}
+
+/* ---------- relatório ---------- */
+.report{background:var(--cream);color:var(--ink);border:3px solid var(--night);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:14px;box-shadow:0 6px 0 var(--night)}
+.report .hd{display:flex;justify-content:space-between;gap:10px;border-bottom:3px solid var(--night);padding-bottom:8px;font-family:var(--f-mono);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.report .eyebrow{color:var(--gold-d)}
+.stars{display:flex;justify-content:center;gap:6px}
+.stars svg{width:58px;height:58px;animation:starpop .5s cubic-bezier(.2,1.6,.4,1) backwards}
+.stars svg:nth-child(2){width:72px;height:72px;margin-top:-12px;animation-delay:.25s}
+.stars svg:nth-child(3){animation-delay:.5s}
+@keyframes starpop{from{transform:scale(0) rotate(-90deg)}to{transform:none}}
+.stamp{display:inline-block;align-self:center;text-align:center;font-family:var(--f-display);font-size:clamp(1.3rem,6.5vw,2.4rem);line-height:1.1;text-transform:uppercase;border:5px solid currentColor;border-radius:12px;padding:2px 16px;transform:rotate(-4deg);width:max-content;max-width:100%;background:#fff;animation:stampin .5s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes stampin{from{transform:rotate(-4deg) scale(2.2);opacity:0}to{transform:rotate(-4deg) scale(1);opacity:1}}
+.g-bom{color:var(--ok)} .g-ressalva{color:var(--amber)} .g-ruim{color:var(--danger)} .g-obito{color:#5d6261}
+.verdict{text-align:center;font-weight:800}
+.score{display:flex;align-items:baseline;justify-content:center;gap:8px;flex-wrap:wrap}
+.score b{font-family:var(--f-display);font-weight:400;font-size:3.4rem;line-height:1;font-variant-numeric:tabular-nums;color:var(--s-exm)}
+.phases{display:flex;flex-direction:column;gap:8px}
+.ph{display:grid;grid-template-columns:minmax(0,1fr) 60px;gap:3px 10px;align-items:center;font-size:.9rem;font-weight:800}
+.ph .v{font-family:var(--f-display);font-weight:400;text-align:right}
+.ph .bar{grid-column:1/-1;margin:0;background:#e9dfc6;height:10px;border:2px solid var(--night)}
+.ph .bar i{background:linear-gradient(90deg,var(--s-exm),#c9a2ff)}
+.ok-t{color:var(--ok)} .bad-t{color:var(--danger)} .warn-t{color:var(--amber)}
+.sect{display:flex;flex-direction:column;gap:6px;border-top:3px dashed #e3d6b8;padding-top:12px}
+
+/* ---------- painel ---------- */
+.board{width:100%;border-collapse:collapse;font-size:.9rem}
+.board th{text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:6px 8px;border-bottom:3px solid var(--night)}
+.board td{padding:10px 8px;border-bottom:2px solid #e3d6b8;vertical-align:top}
+.board td.pts{font-family:var(--f-display);text-align:right;font-size:1.1rem}
+.chip{display:inline-block;border-radius:999px;padding:2px 8px;font-size:.75rem;font-weight:900;border:2px solid currentColor;white-space:nowrap;background:#fff}
+.scroll{overflow-x:auto}
+.counts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.counts div{background:#fff;border:2.5px solid var(--night);border-radius:12px;padding:8px;text-align:center}
+.counts b{display:block;font-family:var(--f-display);font-weight:400;font-size:1.7rem}
+.counts span{font-size:.66rem;text-transform:uppercase;letter-spacing:.04em;font-weight:900}
+@media (max-width:420px){
+ .counts{grid-template-columns:repeat(2,1fr)}
+ .pcard{width:104px;height:150px;margin-left:-52px}.hand{height:222px}
+ .pcard .tcg .name{font-size:.64rem}.pcard .tcg .type{font-size:.54rem}
+ .pcard{bottom:30px}.hand{height:232px}
+ .meter{padding-left:36px}.meter .ico{width:28px;height:28px}.meter b{font-size:1.02rem}
+}
+
+/* ---------- triagem, tutorial, emergência ---------- */
+.triage{width:min(420px,100%);max-height:100%;overflow:auto;background:var(--cream);color:var(--ink);border:3px solid var(--night);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 0 var(--night);animation:slide .4s cubic-bezier(.2,1.3,.4,1)}
+.triage .eyebrow{color:var(--danger)}
+.vitals{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vitals div{background:#fff;border:2.5px solid var(--night);border-radius:12px;padding:6px 10px;min-width:0}
+.vitals span{display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:900}
+.vitals b{font-family:var(--f-display);font-weight:400;font-size:1rem;line-height:1.15}
+.vitals .alto{background:#ffe1e3;border-color:var(--danger)} .vitals .alto b{color:var(--danger)}
+.tchoices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tbtn{border:3px solid var(--night);border-radius:14px;padding:10px 8px;font-weight:800;font-size:.8rem;box-shadow:var(--pop);display:flex;flex-direction:column;align-items:center;gap:2px;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.3);transition:transform .1s}
+.tbtn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--night)}
+.tbtn b{font-family:var(--f-display);font-weight:400;font-size:1.35rem}
+.tbtn.ok{background:linear-gradient(#5fe0a8,#22a861)} .tbtn.bad{background:linear-gradient(#ff8f9f,#e8414f)}
+.coach{position:fixed;inset:0;z-index:70}
+.spot{position:fixed;border-radius:14px;box-shadow:0 0 0 9999px rgba(13,18,38,.78),0 0 0 4px var(--gold);pointer-events:none}
+.tip{position:fixed;left:50%;transform:translateX(-50%);width:min(340px,calc(100% - 32px));background:var(--cream);color:var(--ink);border:3px solid var(--night);border-radius:16px;padding:12px 14px;box-shadow:0 6px 0 var(--night);display:flex;flex-direction:column;gap:8px;font-weight:800;animation:pop .3s}
+.tnum{font-family:var(--f-display);color:var(--gold-d);font-size:.9rem}
+.tabletitle{margin:0;line-height:1.3;font-size:.74rem;font-weight:900;text-align:center;color:#d4ffe9;letter-spacing:.02em}
+.s-emg{--suit:#e8414f}
+.deck.alarm .back{animation:alarm .9s ease-in-out infinite}
+@keyframes alarm{50%{box-shadow:0 0 0 4px #fff,0 0 20px 6px #ff4d6d}}
+.tcg.urgent{box-shadow:0 0 0 3px #fff,0 0 16px 4px rgba(255,77,109,.85)}
+
+/* ---------- tela de jogo sem rolagem ---------- */
+html.casemode,html.casemode body{height:100%;overflow:hidden}
+html.casemode .app{height:100%;max-width:560px;padding-block:6px;gap:6px;display:flex;flex-direction:column}
+html.casemode .hud{position:static;background:none;padding:0;gap:6px;flex:none}
+html.casemode .dxchip{display:none}
+html.casemode .meter{padding:3px 6px 4px 34px;border-radius:12px;border-width:2.5px}
+html.casemode .meter .ico{width:26px;height:26px;left:4px}
+html.casemode .meter span{font-size:.54rem}
+html.casemode .meter b{font-size:.98rem}
+html.casemode .bar{height:5px;margin-top:2px}
+html.casemode .stage{flex:1 1 0;min-height:110px;background:linear-gradient(#d8eee7 0 73%,#b9ddd2 73% 76%,#ece5d6 76%)}
+html.casemode .stage svg.scene{height:100%}
+html.casemode .tag{font-size:.66rem;padding:2px 10px;bottom:4%}
+html.casemode .profbar{flex:none;min-height:0;padding:4px 10px 4px 4px;grid-template-columns:32px 1fr;gap:8px;font-size:.76rem;line-height:1.25;border-width:2.5px;box-shadow:0 3px 0 var(--night)}
+html.casemode .profbar .hd{width:32px;height:32px;border-width:2px;border-radius:9px}
+html.casemode .profbar b,html.casemode .queixa b{display:inline;font-size:.66rem;margin-right:4px}
+html.casemode .queixa{flex:none;padding:4px 10px;font-size:.76rem;line-height:1.25;gap:8px;grid-template-columns:auto 1fr;border-width:2.5px;box-shadow:0 3px 0 var(--night)}
+html.casemode .queixa svg{width:16px;height:16px}
+
+html.casemode .table{flex:none;padding:8px 8px 0;border-width:5px;gap:3px;border-radius:18px}
+html.casemode .decks{padding-top:9px;gap:5px}
+html.casemode .deck{font-size:.56rem;gap:1px}
+html.casemode .deck .back{max-width:38px;border-width:2px}
+html.casemode .deck .n{min-width:17px;height:17px;font-size:.62rem;top:-5px}
+html.casemode .deck .st{font-size:.54rem}
+html.casemode .handbar{min-height:28px;font-size:.72rem}
+html.casemode .stepnote{font-size:.76rem;padding:3px 3px 3px 10px}
+html.casemode .stepnote button{padding:4px 8px;font-size:.78rem}
+html.casemode .linkbtn{font-size:.66rem;padding:3px 7px}
+html.casemode .hand{height:156px}
+html.casemode .pcard{width:88px;height:124px;margin-left:-44px;bottom:16px}
+html.casemode .pcard .tcg{padding:4px;gap:3px;border-width:2px;border-radius:10px}
+html.casemode .pcard .tcg .gem{width:19px;height:19px;font-size:.72rem;border-width:2px}
+html.casemode .pcard .tcg .type{font-size:.48rem}
+html.casemode .pcard .tcg .coin{font-size:.52rem;padding:0 4px}
+html.casemode .pcard .tcg .art{border-width:2px}
+html.casemode .pcard .tcg .name{font-size:.56rem;border-width:2px;padding:2px 3px}
+html.casemode .actions{flex:none;gap:6px}
+html.casemode .actions .btn{min-height:40px;font-size:.92rem;padding-block:4px;border-width:2.5px;box-shadow:0 3px 0 var(--night),inset 0 2px 0 rgba(255,255,255,.6)}
+@media (max-height:660px){html.casemode .hand{height:124px}html.casemode .pcard{width:76px;height:106px;margin-left:-38px;bottom:12px}html.casemode .deck .back{max-width:30px!important}html.casemode .stage{min-height:96px}html.casemode .handbar{min-height:24px;font-size:.66rem}html.casemode .actions .btn{min-height:36px}}
+@media (min-width:900px){
+ html.casemode .app{max-width:1320px;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto auto;
+   grid-template-areas:"hud table" "stage table" "prof table" "queixa actions";gap:12px;padding-block:14px}
+ html.casemode #hud{grid-area:hud} html.casemode .stage{grid-area:stage;min-height:0}
+ html.casemode .profbar{grid-area:prof;font-size:.92rem;padding:6px 12px 6px 6px;grid-template-columns:44px 1fr}
+ html.casemode .profbar .hd{width:44px;height:44px}
+ html.casemode .queixa{grid-area:queixa;font-size:.92rem;padding:8px 12px}
+ html.casemode .profbar b,html.casemode .queixa b{display:block;font-size:.78rem}
+ html.casemode .table{grid-area:table;display:flex;flex-direction:column;min-height:0;padding:10px 12px 0;border-width:7px}
+ html.casemode .actions{grid-area:actions;align-self:end}
+ html.casemode .dxchip{display:flex}
+ html.casemode .meter{padding:5px 8px 6px 42px}
+ html.casemode .meter .ico{width:32px;height:32px}
+ html.casemode .meter span{font-size:.62rem} html.casemode .meter b{font-size:1.2rem}
+ html.casemode .tabletitle{font-size:.85rem;display:block}
+ html.casemode .deck{font-size:.72rem} html.casemode .deck .st{font-size:.66rem}
+ html.casemode .deck .back{max-width:70px}
+ html.casemode .handbar{font-size:.85rem}
+ html.casemode .hand{flex:1;height:auto;min-height:230px}
+ html.casemode .pcard{width:150px;height:212px;margin-left:-75px;bottom:26px}
+ html.casemode .pcard .tcg{padding:5px;gap:4px;border-width:2.5px;border-radius:12px}
+ html.casemode .pcard .tcg .gem{width:24px;height:24px;font-size:.9rem}
+ html.casemode .pcard .tcg .type{font-size:.6rem}
+ html.casemode .pcard .tcg .name{font-size:.8rem;padding:4px 6px}
+ html.casemode .actions .btn{min-height:50px;font-size:1.05rem}
+}
+
+@media (max-width:899px){
+ html.casemode .bubble{font-size:.68rem;max-width:50%;padding:4px 7px;border-width:2px}
+ html.casemode .bubble small{font-size:.56rem}
+ html.casemode .profbar,html.casemode .queixa{font-size:.72rem}
+ html.casemode .deck .st{display:none}
+ html.casemode .deck .st.flag{display:block;position:absolute;top:-9px;left:50%;transform:translateX(-50%);z-index:3;background:var(--gold);color:var(--night);border:1.5px solid var(--night);border-radius:99px;padding:0 4px;font-size:.5rem;white-space:nowrap;opacity:1}
+ html.casemode .deck.alarm .st.flag{background:#ff4d6d;color:#fff}
+ html.casemode .deck .back{max-width:34px}
+}
+
+/* ---------- pistas, requer antes, som, final, progressão ---------- */
+.clues{display:flex;gap:6px;align-items:center;overflow-x:auto;background:rgba(10,14,35,.35);border:2.5px dashed rgba(255,255,255,.35);border-radius:12px;padding:5px 8px;min-height:36px;scrollbar-width:thin}
+.clues .lbl{flex:none;font-family:var(--f-display);color:var(--gold);font-size:.8rem;letter-spacing:.04em;text-transform:uppercase}
+.clues .none{font-size:.74rem;font-weight:800;opacity:.75;white-space:nowrap}
+.clue{flex:none;white-space:nowrap;background:#fff7b0;color:var(--night);border:2px solid var(--night);border-radius:6px;padding:2px 8px;font-size:.72rem;font-weight:800;transform:rotate(-1.2deg);box-shadow:0 2px 0 var(--night)}
+.clue:nth-of-type(even){transform:rotate(1.2deg);background:#d3f2ff}
+.clue b{color:color-mix(in srgb,var(--suit) 75%,#000)}
+.clue.new{animation:pop .4s cubic-bezier(.2,1.6,.4,1)}
+.reqtag{position:absolute;left:50%;bottom:4px;transform:translateX(-50%);background:var(--night);color:#ffd36b;font-family:var(--f-display);font-size:.5rem;letter-spacing:.04em;padding:1px 6px;border-radius:99px;white-space:nowrap;text-transform:uppercase}
+.bigtcg .reqtag{font-size:.75rem;bottom:8px;padding:2px 10px}
+.tcg .req{display:block;background:#ffe1e3;color:var(--danger);border:2px solid var(--danger);border-radius:8px;padding:3px 7px;margin-bottom:5px;font-weight:900}
+.sndbtn{position:absolute;right:8px;bottom:8px;z-index:4;width:34px;height:34px;border-radius:50%;border:2.5px solid var(--night);background:var(--cream);color:var(--night);display:grid;place-items:center;padding:0;box-shadow:0 2px 0 var(--night)}
+.sndbtn svg{width:18px;height:18px}
+.sndbtn[aria-pressed="false"]{background:#cfd3e6}
+.flatline{transition:opacity .4s}
+.end-bom .enter{animation:hop .42s ease-in-out 3,leave 1s 1.45s ease-in forwards}
+.end-bom .enter2{animation:leave 1.1s 1.5s ease-in forwards}
+.end-ressalva .enter{animation:hop .5s ease-in-out 2}
+.end-ruim svg.scene{filter:saturate(.45) brightness(.9);transition:filter 1s}
+.end-obito svg.scene{filter:grayscale(1) brightness(.72);transition:filter 1.4s}
+.end-obito .ecg-line{opacity:0}
+.end-obito .flatline{opacity:1}
+@keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-24px)}}
+@keyframes leave{to{transform:translateX(280px);opacity:0}}
+.xprow{display:flex;align-items:center;gap:12px}
+.lvlnum{flex:none;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-family:var(--f-display);font-size:1.5rem;color:var(--night);background:radial-gradient(circle at 35% 30%,#fff 0 10%,#ffe58a 30%,var(--gold) 60%,var(--gold-d));border:3px solid var(--night);box-shadow:0 3px 0 var(--night)}
+.lvlname{font-family:var(--f-display);font-weight:400;font-size:1.2rem}
+.xpbar{height:12px;border-radius:99px;background:#e9dfc6;border:2px solid var(--night);overflow:hidden;margin:4px 0 2px}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,#3d8bff,#7ef0d9);animation:grow 1.2s .3s cubic-bezier(.2,.8,.2,1) backwards}
+@keyframes grow{from{width:0}}
+.xpbox{background:#fff;border:3px solid var(--night);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.xpbox .gain{font-family:var(--f-display);color:var(--s-anam);font-size:1.2rem;white-space:nowrap}
+.xpbox.up{box-shadow:0 0 0 4px var(--gold)}
+.levelup{font-family:var(--f-display);font-size:1.3rem;color:var(--gold-d);text-align:center;animation:pop .5s .6s cubic-bezier(.2,1.6,.4,1) backwards}
+.medals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.medal{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;font-size:.64rem;line-height:1.15;color:var(--muted)}
+.medal svg{width:36px;height:42px}
+.medal.on{color:var(--ink)}
+.medal.new{grid-column:span 2;background:#fff8dd;border:2.5px solid var(--night);border-radius:12px;padding:6px;animation:pop .5s .8s cubic-bezier(.2,1.6,.4,1) backwards}
+.medal.new small{font-weight:700;color:var(--muted)}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{border:3px solid var(--night);border-radius:14px;background:#fff;color:var(--ink);padding:10px;text-align:left;display:flex;flex-direction:column;gap:3px;box-shadow:0 3px 0 var(--night)}
+.mode b{font-family:var(--f-display);font-weight:400;font-size:1.2rem}
+.mode small{font-size:.74rem;font-weight:700;color:var(--muted)}
+.mode[aria-pressed="true"]{background:#d4f4ee;box-shadow:0 3px 0 var(--night),0 0 0 4px var(--gold)}
+html.casemode .clues{flex:none;min-height:32px;padding:3px 7px;border-width:2px}
+@media (max-width:899px){html.casemode .sndbtn{width:28px;height:28px;right:6px;bottom:6px}html.casemode .sndbtn svg{width:15px;height:15px}html.casemode .clue{font-size:.66rem}}
+@media (max-height:660px){html.casemode .stage{min-height:84px}html.casemode .tabletitle{display:none}html.casemode .decks{padding-top:8px}html.casemode .profbar,html.casemode .queixa{font-size:.68rem;line-height:1.2}}
+@media (min-width:900px){
+ html.casemode .app{grid-template-rows:auto auto minmax(0,1fr) auto auto auto;grid-template-areas:"hud table" "vit table" "stage table" "prof table" "queixa table" "clues actions"}
+ html.casemode .vpanel{grid-area:vit}
+ html.casemode .clues{grid-area:clues;flex-wrap:wrap;max-height:84px;overflow-y:auto;align-content:flex-start}
+}
+
+/* ---------- painel de sinais vitais ---------- */
+.vpanel{display:grid;grid-template-columns:auto repeat(4,minmax(0,1fr));gap:6px;align-items:stretch;background:#0d1226;border:3px solid #0d1226;border-radius:14px;padding:4px;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.vpanel .vlbl{writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--f-display);font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;color:#7ef0b9;text-align:center;padding:0 2px}
+.vit{min-width:0;border-radius:9px;padding:3px 7px;background:#16203f;border:2px solid #2a3566;color:#fff;transition:background .4s,border-color .4s}
+.vit span{display:block;font-size:.56rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#aeb6dd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vit b{display:block;font-family:var(--f-display);font-weight:400;font-size:.92rem;line-height:1.15;overflow-wrap:anywhere}
+.vit.ok b{color:#7ef0b9} .vit.mid b{color:#ffd36b} .vit.bad b{color:#ff8a8a}
+.vit.bad{border-color:#6b2a3a}
+.vit.up{animation:vup 1.2s ease} .vit.down{animation:vdown 1.2s ease}
+.vit.up span{color:#7ef0b9} .vit.down span{color:#ff8a8a}
+@keyframes vup{0%{background:#1f7a55;transform:scale(1.06)}100%{background:#16203f;transform:none}}
+@keyframes vdown{0%{background:#8a2335;transform:scale(1.06)}100%{background:#16203f;transform:none}}
+html.casemode .vpanel{flex:none;padding:3px;gap:4px;border-width:2px}
+@media (max-width:899px){html.casemode .vit{padding:2px 5px}html.casemode .vit span{font-size:.5rem}html.casemode .vit b{font-size:.74rem}html.casemode .vpanel .vlbl{font-size:.52rem}}
+
+@media (max-width:899px){
+ html.casemode .vpanel{grid-template-columns:repeat(4,minmax(0,1fr))}
+ html.casemode .vpanel .vlbl{display:none}
+ html.casemode .vit b{font-size:.68rem;line-height:1.15}
+ html.casemode .meter{padding:2px 6px 3px 32px}
+ html.casemode .meter span{display:none}
+ html.casemode .meter .ico{width:24px;height:24px}
+ html.casemode .meter b{font-size:1rem}
+ html.casemode .profbar,html.casemode .queixa{font-size:.68rem;line-height:1.2}
+ html.casemode .hand{height:146px}
+ html.casemode .pcard{width:84px;height:118px;margin-left:-42px;bottom:14px}
+}
+
+@media (max-width:899px) and (max-height:730px){html.casemode .tabletitle{display:none}html.casemode .stage{min-height:92px}html.casemode .decks{padding-top:8px}}
+@media (max-width:899px) and (max-height:660px){html.casemode .stage{min-height:62px}html.casemode .hand{height:114px}html.casemode .pcard{width:72px;height:100px;margin-left:-36px;bottom:10px}
+ html.casemode .clues{min-height:26px;padding:2px 6px}html.casemode .actions .btn{min-height:32px;font-size:.85rem}html.casemode .deck .back{max-width:26px!important}html.casemode .vit b{font-size:.62rem}}
+.sndbtn.global{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:max(10px,env(safe-area-inset-right,0px));bottom:auto;width:40px;height:40px;z-index:20}
+.sndbtn.global svg{width:20px;height:20px}
+
+/* ---------- plantão, itens, aviso de turno ---------- */
+.intent{position:absolute;left:50%;top:40%;transform:translateX(-50%);z-index:4;display:flex;flex-direction:column;align-items:center;background:var(--danger);color:#fff;border:2.5px solid var(--night);border-radius:12px;padding:3px 10px;box-shadow:0 3px 0 var(--night);animation:intent 1.2s ease-in-out infinite;pointer-events:none;white-space:nowrap}
+.intent b{font-family:var(--f-display);font-weight:400;font-size:.95rem;line-height:1.1}
+.intent span{font-size:.62rem;font-weight:800;opacity:.9}
+@keyframes intent{50%{transform:translateX(-50%) scale(1.07)}}
+html.casemode .intent b{font-size:.8rem} html.casemode .intent{padding:2px 8px}
+.runbar{display:flex;align-items:center;gap:10px;background:var(--night);border:3px solid #0d1226;border-radius:14px;padding:6px 10px;color:#fff;flex-wrap:wrap}
+.runsteps{display:flex;gap:6px;flex:1;min-width:0;flex-wrap:wrap}
+.rstep{font-size:.72rem;font-weight:900;border:2px dashed #5b6283;border-radius:99px;padding:2px 9px;color:#aeb6dd}
+.rstep.cur{border-style:solid;border-color:var(--gold);color:var(--gold);animation:pulse 1.4s infinite}
+.rstep.done{border-style:solid;background:#fff;border-color:currentColor}
+.runpts{font-family:var(--f-display);font-weight:400;font-size:1.1rem;color:var(--gold)}
+.picks{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pickcard{background:var(--cream);color:var(--ink);border:3px solid var(--night);border-radius:18px;padding:10px;display:flex;flex-direction:column;gap:4px;text-align:left;box-shadow:var(--pop);transition:transform .15s}
+.pickcard:hover{transform:translateY(-4px)}
+.pickcard svg{width:100%;height:auto;border-radius:12px;border:2.5px solid var(--night);background:#d8eee7}
+.pickcard b{font-family:var(--f-display);font-weight:400;font-size:1.3rem}
+.pickcard small{font-size:.74rem;font-weight:800;color:var(--muted)}
+.pickcard .said{font-size:.82rem;font-weight:700;font-style:italic}
+.items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.itemcard{position:relative;aspect-ratio:5/7.4;padding:0;border:0;background:none;transition:transform .2s;animation:zoomin .4s cubic-bezier(.2,1.3,.4,1) backwards}
+.itemcard:nth-child(2){animation-delay:.12s}.itemcard:nth-child(3){animation-delay:.24s}
+.itemcard:hover{transform:translateY(-6px) rotate(-1deg)}
+.itemcard .tcg{border-radius:14px}
+.itemcard .tcg::after{animation:shine 2.4s ease-in-out infinite}
+.s-item{--suit:#ffb020}
+.itemcard .name{flex:0 0 auto;font-size:.72rem}
+.itemcard .txt{display:block;flex:1;background:rgba(255,255,255,.88);border:2px solid var(--night);border-radius:8px;padding:4px 6px;font-size:.66rem;font-weight:800;line-height:1.25}
+.itemchips{display:flex;flex-wrap:wrap;gap:6px}
+.ichip{background:#fff1c2;color:var(--night);border:2px solid var(--night);border-radius:99px;padding:2px 9px;font-size:.74rem;font-weight:900}
+.runrow{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;padding:4px 0;border-bottom:2px dashed #e3d6b8}
+.runrow .pts{font-family:var(--f-display);font-size:1.1rem}
+.runrow .muted{font-size:.78rem;min-width:0}
+@media (max-width:420px){.items{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.itemcard .name{font-size:.6rem}.itemcard .txt{font-size:.56rem;padding:3px 4px}.pickcard b{font-size:1.1rem}}
+
+.sndbtn[hidden]{display:none}
+html:not(.casemode) .app{padding-top:58px}
+.itemcard{aspect-ratio:auto;display:flex}
+.itemcard .tcg{position:relative;inset:auto;flex:1;min-height:100%}
+.itemcard .art{flex:0 0 66px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+
+</head>
+<body>
+
+<main class="app" id="app"></main>
+<div id="overlay"></div>
+
+<script>
+/* ---------- ícones dos naipes ---------- */
+const ICON={
+ anam:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>',
+ fis:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 3v6a5 5 0 0 0 10 0V3"/><path d="M11 14v3a4 4 0 0 0 8 0v-2"/><circle cx="19" cy="12" r="2.2" fill="currentColor"/></svg>',
+ exm:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 2h6M10 2v13a4 4 0 0 0 4 4 4 4 0 0 0 4-4V2"/><path d="M10 11h8" /><path d="M10 11v4a4 4 0 0 0 8 0v-4z" fill="currentColor"/></svg>',
+ dx:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="5" y="4" width="14" height="18" rx="2"/><path d="M9 2h6v4H9zM8.5 13l2.5 2.5 4.5-5"/></svg>',
+ tx:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 2l4 4M20 4l-9 9M14 5l5 5M7 12l5 5-3 3-5-5zM4 20l-2 2"/></svg>'
+};
+
+/* ---------- personagens ---------- */
+function person(o){
+  const {skin='#e8b98f',hair='#3b2a24',style='short',shirt='#4f7cc0',pants='#3a4258',coat=false,id='',cls='',glasses=false}=o;
+  const fringe=`<path d="M-17 -147c0-11 8-16 17-16s17 5 17 16c-5-4-10-5-17-5s-12 1-17 5z" fill="${hair}"/>`;
+  let hairBack='',hairSvg=fringe;
+  if(style==='long')hairBack=`<rect x="-21" y="-160" width="42" height="50" rx="16" fill="${hair}"/>`;
+  if(style==='bun')hairBack=`<circle cx="0" cy="-165" r="8" fill="${hair}"/>`;
+  if(style==='cap')hairSvg=`<path d="M-18 -150c0-10 8-15 18-15s18 5 18 15z" fill="${hair}"/><rect x="-4" y="-153" width="28" height="5" rx="2.5" fill="${hair}"/>`;
+  const body=coat?
+   `<rect x="-24" y="-118" width="48" height="66" rx="13" fill="#fbfbf8" stroke="#c9d3d1" stroke-width="1.5"/>
+    <path d="M-8 -118l8 16 8-16z" fill="var(--scrub,#0f6e66)"/><path d="M0 -102v48" stroke="#c9d3d1" stroke-width="1.5"/>
+    <path d="M-12 -112c-4 14 0 26 8 30M12 -112c4 14 0 26-8 30" fill="none" stroke="#2d3b3a" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="-4" cy="-80" r="3.5" fill="#9aa9a7" stroke="#2d3b3a" stroke-width="1.6"/>
+    <rect x="-32" y="-112" width="10" height="50" rx="5" fill="#fbfbf8" stroke="#c9d3d1" stroke-width="1.5"/><rect x="22" y="-112" width="10" height="50" rx="5" fill="#fbfbf8" stroke="#c9d3d1" stroke-width="1.5"/>`
+   :`<rect x="-24" y="-118" width="48" height="62" rx="14" fill="${shirt}"/>
+    <rect x="-32" y="-112" width="10" height="48" rx="5" fill="${shirt}"/><rect x="22" y="-112" width="10" height="48" rx="5" fill="${shirt}"/>`;
+  return `<g id="${id}" class="person ${cls}">
+   <rect x="-14" y="-60" width="12" height="56" rx="4" fill="${pants}"/><rect x="2" y="-60" width="12" height="56" rx="4" fill="${pants}"/>
+   <rect x="-17" y="-7" width="17" height="7" rx="3" fill="#2a2a2e"/><rect x="0" y="-7" width="17" height="7" rx="3" fill="#2a2a2e"/>
+   ${body}
+   <circle cx="-27" cy="-60" r="5" fill="${skin}"/><circle cx="27" cy="-60" r="5" fill="${skin}"/>
+   <rect x="-5" y="-127" width="10" height="11" fill="${skin}"/>
+   ${hairBack}<circle cx="0" cy="-141" r="17" fill="${skin}"/>${hairSvg}
+   <circle cx="-6" cy="-141" r="2" fill="#2a2a2e"/><circle cx="6" cy="-141" r="2" fill="#2a2a2e"/>
+   ${glasses?'<circle cx="-6" cy="-141" r="5" fill="none" stroke="#2a2a2e" stroke-width="1.6"/><circle cx="6" cy="-141" r="5" fill="none" stroke="#2a2a2e" stroke-width="1.6"/><path d="M-1 -141h2" stroke="#2a2a2e" stroke-width="1.6"/>':''}
+   ${o.beard?`<path d="M-16 -140q1 16 16 18q15 -2 16 -18q-4 9 -16 10q-12 -1 -16 -10z" fill="${hair}"/>`:''}
+   <ellipse class="mouth" cx="0" cy="-132" rx="4" ry="1.6" fill="#7a4b35"/></g>`;
+}
+function vetPerson(f,id){return person({id,coat:true,style:f?'bun':'short',hair:f?'#4a2e22':'#26262b',skin:f?'#e2ad84':'#c98f68',pants:'#245f5a'})}
+function profPerson(){return person({id:'profFig',coat:true,style:'short',hair:'#c9c9c9',skin:'#e3b08a',pants:'#3a4258',glasses:true,beard:true})}
+function moodSVG(){return `<g id="mood" class="mood" transform="translate(58 50)">
+ <circle cx="200" cy="44" r="15" fill="#ffd96b" stroke="#1d2f2d" stroke-width="2"/>
+ <circle cx="194.5" cy="40" r="2.2" fill="#1d2f2d"/><circle cx="205.5" cy="40" r="2.2" fill="#1d2f2d"/>
+ <path id="moodMouth" d="M193 48q7 6 14 0" stroke="#1d2f2d" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+ <rect id="moodTagBg" x="178" y="62" width="44" height="13" rx="6.5" fill="#1d2f2d"/><text id="moodTag" x="200" y="71.5" text-anchor="middle" font-size="8" font-weight="700" fill="#fff" font-family="sans-serif">Boa!</text></g>`}
+function avatarSVG(f){return `<svg viewBox="-45 -175 90 180" role="img" aria-label="${f?'Veterinária':'Veterinário'}">${vetPerson(f,'')}</svg>`}
+
+/* ---------- animais ---------- */
+function dogSVG(fur,dark){return `<g class="dog">
+ <path class="pet-tail" d="M58 -52Q76 -64 78 -86" stroke="${fur}" stroke-width="7" fill="none" stroke-linecap="round"/>
+ <rect x="36" y="-36" width="10" height="36" rx="4" fill="${dark}"/><rect x="-16" y="-36" width="10" height="36" rx="4" fill="${dark}"/>
+ <ellipse class="pet-body" cx="22" cy="-50" rx="46" ry="21" fill="${fur}"/>
+ <rect x="50" y="-36" width="10" height="36" rx="4" fill="${fur}"/><rect x="-2" y="-36" width="10" height="36" rx="4" fill="${fur}"/>
+ <g class="pet-head">
+  <path d="M-18 -60L-2 -42 10 -58-6 -78z" fill="${fur}"/>
+  <circle cx="-24" cy="-80" r="17" fill="${fur}"/>
+  <ellipse cx="-40" cy="-74" rx="13" ry="8.5" fill="${fur}"/>
+  <circle cx="-52" cy="-77" r="4" fill="#222"/>
+  <path d="M-48 -68q6 3 10 0" stroke="#222" stroke-width="1.5" fill="none"/>
+  <ellipse class="eye" cx="-29" cy="-84" rx="2.6" ry="2.9" fill="#222"/>
+  <path d="M-17 -95q15 0 12 27q-10-4-14-13z" fill="${dark}"/>
+  <path d="M-15 -62l17 -6 2 5 -17 6z" fill="#d24b3f"/><circle cx="-6" cy="-60" r="2.4" fill="#f2c94c"/>
+ </g></g>`}
+function catSVG(fur,dark,striped){return `<g class="cat">
+ <path class="pet-tail" d="M30 -6Q58 -4 52 -38" stroke="${fur}" stroke-width="7" fill="none" stroke-linecap="round"/>
+ <ellipse class="pet-body" cx="12" cy="-30" rx="26" ry="30" fill="${fur}"/>
+ <ellipse cx="22" cy="-14" rx="16" ry="14" fill="${dark}" opacity=".45"/>
+ ${striped?`<path d="M2 -52q10 4 20 0M0 -40q12 4 24 0M2 -28q10 4 20 0" stroke="${dark}" stroke-width="3" fill="none" stroke-linecap="round"/>`:''}
+ <rect x="-10" y="-34" width="8" height="34" rx="4" fill="${fur}"/><rect x="0" y="-34" width="8" height="34" rx="4" fill="${fur}"/>
+ <g class="pet-head" style="transform-origin:50% 100%">
+  <path d="M-21 -74L-23 -95-8 -81z" fill="${fur}"/><path d="M1 -81L10 -97 12 -74z" fill="${fur}"/>
+  <path d="M-19 -78L-20 -89-12 -81z" fill="#e8a0ad"/><path d="M4 -81L9 -91 10 -78z" fill="#e8a0ad"/>
+  <circle cx="-6" cy="-66" r="17" fill="${fur}"/>
+  ${striped?`<path d="M-10 -82v6M-6 -83v7M-2 -82v6" stroke="${dark}" stroke-width="2.2" stroke-linecap="round"/>`:''}
+  <ellipse class="eye" cx="-13" cy="-68" rx="2.6" ry="3.5" fill="#2f3a16"/><ellipse class="eye" cx="1" cy="-68" rx="2.6" ry="3.5" fill="#2f3a16"/>
+  <path d="M-8.5 -61h5l-2.5 3z" fill="#e58a9a"/>
+  <path d="M-12 -59l-18 -3M-12 -58l-18 2M0 -59l18 -3M0 -58l18 2" stroke="#4b4b4b" stroke-width=".9"/>
+ </g></g>`}
+function petSVG(cs){return cs.esp==='gato'?catSVG(cs.fur,cs.dark,cs.striped):dogSVG(cs.fur,cs.dark)}
+
+/* ---------- cenários ---------- */
+function roomBack(){return `
+ <defs><linearGradient id="steel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f7f8"/><stop offset=".5" stop-color="#c3ccd0"/><stop offset="1" stop-color="#e3e9eb"/></linearGradient>
+ <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fd3ef"/><stop offset="1" stop-color="#e3f3fa"/></linearGradient>
+ <pattern id="tiles" width="32" height="20" patternUnits="userSpaceOnUse"><rect width="32" height="20" fill="#ece5d6"/><path d="M0 0H32M0 0V20" stroke="#d6ccb7" stroke-width="1"/></pattern></defs>
+ <rect width="400" height="190" fill="#d8eee7"/>
+ <rect y="146" width="400" height="44" fill="#b9ddd2"/><rect y="144" width="400" height="4" fill="#97c6b8"/>
+ <rect y="190" width="400" height="70" fill="url(#tiles)"/>
+ <g><rect x="14" y="20" width="80" height="66" rx="3" fill="#fff"/><rect x="19" y="25" width="70" height="56" fill="url(#sky)"/>
+  <circle cx="72" cy="40" r="7" fill="#fff4c7"/><path d="M19 70q16-12 30-2t40-6v19H19z" fill="#8cc79a"/>
+  <path d="M19 31h70M19 37h70M19 43h70" stroke="#fff" stroke-width="2" opacity=".7"/><rect x="51" y="25" width="3" height="56" fill="#fff"/></g>
+ <g><rect x="122" y="22" width="62" height="82" rx="2" fill="#fffdf6" stroke="#d8cfb9"/>
+  <text x="153" y="33" text-anchor="middle" font-size="7" font-weight="700" fill="#0f6e66" font-family="sans-serif">PÂNCREAS</text>
+  <path d="M131 46c4-6 12-3 18-6s14-4 20 0c3 3-2 6-8 6s-11 4-18 5-14 0-12-5z" fill="#ffd28a" stroke="#c98a4a" stroke-width="1"/>
+  <rect x="129" y="58" width="48" height="11" rx="3" fill="#d5ece8"/><text x="153" y="65.5" text-anchor="middle" font-size="5" fill="#1d2f2d" font-family="sans-serif">Insulina ↓ glicose</text>
+  <rect x="129" y="72" width="48" height="11" rx="3" fill="#fbe3c4"/><text x="153" y="79.5" text-anchor="middle" font-size="5" fill="#1d2f2d" font-family="sans-serif">Glucagon ↑ glicose</text>
+  <rect x="129" y="86" width="48" height="11" rx="3" fill="#f6d6e0"/><text x="153" y="93.5" text-anchor="middle" font-size="5" fill="#1d2f2d" font-family="sans-serif">Gastrina ↑ ácido</text></g>
+ <g id="monitor"><rect x="206" y="24" width="84" height="52" rx="5" fill="#33413f"/><rect x="211" y="29" width="74" height="38" rx="2" fill="#0d1a18"/>
+  <path d="M211 48h74" stroke="#173a33" stroke-width="1"/>
+  <polyline class="ecg-line" points="211,50 228,50 233,44 238,50 244,50 249,32 254,60 259,50 266,50 271,45 276,50 285,50" fill="none" stroke="#5be0a0" stroke-width="1.6" stroke-linejoin="round"/><path class="flatline" d="M211 50h74" stroke="#ff6b5b" stroke-width="1.8" opacity="0"/>
+  <text id="monHR" x="283" y="37" text-anchor="end" font-size="7" fill="#5be0a0" font-family="monospace">--</text>
+  <rect x="244" y="76" width="8" height="10" fill="#33413f"/></g>
+ <g><circle cx="352" cy="38" r="15" fill="#fff" stroke="#33413f" stroke-width="2.5"/><path d="M352 38v-9M352 38l6 4" stroke="#33413f" stroke-width="1.8" stroke-linecap="round"/>
+  <path class="sec" d="M352 38v-12" stroke="#c0443a" stroke-width="1"/></g>
+ <g><rect x="300" y="66" width="92" height="5" rx="1" fill="#a98b64"/>
+  <rect x="306" y="50" width="9" height="16" rx="2" fill="#f2f2f2" stroke="#bbb"/><rect x="306" y="50" width="9" height="5" fill="#c0443a"/>
+  <rect x="320" y="46" width="10" height="20" rx="2" fill="#7fb2d9"/><rect x="335" y="54" width="14" height="12" rx="2" fill="#fff" stroke="#bbb"/>
+  <rect x="354" y="48" width="8" height="18" rx="2" fill="#e5c06b"/><rect x="367" y="52" width="18" height="14" rx="2" fill="#9ed1a8"/></g>`}
+function tableSVG(){return `<ellipse cx="200" cy="242" rx="92" ry="7" fill="rgba(0,0,0,.12)"/>
+ <rect x="134" y="180" width="6" height="60" fill="#a7b0b4"/><rect x="260" y="180" width="6" height="60" fill="#a7b0b4"/><rect x="134" y="222" width="132" height="5" fill="#a7b0b4"/>
+ <rect x="118" y="166" width="164" height="11" rx="3" fill="url(#steel)" stroke="#9aa5a9"/><rect x="122" y="177" width="156" height="5" rx="2" fill="#8f9a9e"/>`}
+function ivSVG(){return `<g id="iv" class="iv"><path d="M296 84V238" stroke="#9aa5a9" stroke-width="3"/><path d="M286 238h20" stroke="#9aa5a9" stroke-width="3"/><path d="M288 84h16" stroke="#9aa5a9" stroke-width="2"/>
+ <rect x="289" y="86" width="14" height="22" rx="4" fill="#dff1fb" stroke="#7fb2d9"/><rect x="291" y="96" width="10" height="10" rx="2" fill="#bfe2f5"/>
+ <circle class="drip" cx="296" cy="112" r="1.6" fill="#7fb2d9"/><path d="M296 112q0 40-40 52" stroke="#7fb2d9" stroke-width="1.3" fill="none"/></g>`}
+
+/* ---------- casos clínicos (nível de graduação) ---------- */
+const a=(id,t,r,v,u)=>({id,t,r,v,u});
+const f=(id,t,r,v,u)=>({id,t,r,v,u});
+const x=(id,t,c,r,v,u)=>({id,t,c,r,v,u});
+const d=(id,t,pts,n)=>({id,t,pts,n});
+const tc=(id,t,ok,n,need)=>({id,t,ok,n,need});
+const VAC=a('q_vac','As vacinas estão em dia?','Sim, todas em dia.','N');
+const RX=x('x_rx','Raio-X de tórax',150,'Sem alterações.','X');
+
+const CASES=[
+{id:'tom',nome:'Tom',esp:'gato',doenca:'Cetoacidose diabética',
+ resumo:'Gato, macho castrado, 10 anos, 6,8 kg (pesava 8 kg)',
+ fala:'Doutor(a), ele parou de comer faz dois dias e hoje vomitou três vezes. Está muito quieto.',
+ stab:60,decay:5,stabilizers:['t_flu'],
+ anam:[a('q_agua','Ele está bebendo mais água?','Muito! Encho o pote várias vezes por dia há umas 3 semanas.','E'),
+  a('q_urina','Está fazendo mais xixi?','A caixa de areia vive cheia de torrões enormes.','U'),
+  a('q_apet','Como está o apetite?','Antes comia demais. Há dois dias parou de comer.','U'),
+  a('q_peso','Ele emagreceu?','Muito, ele era bem gordinho.','E'),
+  a('q_med','Tomou algum remédio recentemente?','Tomou uma injeção de corticoide para alergia há 2 meses.','U'),
+  a('q_vom','Vomitou ou teve diarreia?','Vomitou 3 vezes hoje, sem diarreia.','U'),VAC,
+  a('q_sai','Ele sai de casa?','Não, só fica no apartamento.','N')],
+ fis:[f('f_geral','Avaliação geral','Muito desidratado, fraco, gengiva pálida.','E'),
+  f('f_halito','Cheirar o hálito','Hálito adocicado, com cheiro de acetona.','U'),
+  f('f_marcha','Observar o andar','Apoia os calcanhares no chão (neuropatia do diabetes).','U'),
+  f('f_cerv','Palpar o pescoço','Tireoide normal, sem caroços.','N'),
+  f('f_dente','Examinar os dentes','Um pouco de tártaro.','N')],
+ exm:[x('x_glic','Glicemia',20,'Glicose: 485 mg/dL ↑↑\n(normal: 70–150)','E'),
+  x('x_uri','Exame de urina',50,'Glicose na urina: muita ↑\nCorpos cetônicos: presentes ↑','E'),
+  x('x_ele','Eletrólitos (sódio e potássio)',80,'Potássio: 3,1 ↓ (normal 3,5–5,5)\nSódio: normal\nSangue ácido (acidose)','E'),
+  x('x_hemo','Hemograma',60,'Sangue concentrado pela desidratação.','U'),
+  x('x_bioq','Função renal e hepática',120,'Ureia e creatinina um pouco altas\npor causa da desidratação.','U'),
+  x('x_t4','Dosagem de T4 (tireoide)',90,'Normal.','N'),RX],
+ dx:[d('d_cad','Cetoacidose diabética',20),d('d_dm','Diabetes sem complicação',8,'Ele tem corpos cetônicos e acidose: é um diabetes complicado.'),
+  d('d_drc','Doença renal',0,'A ureia alta vem da desidratação.'),d('d_hiper','Hipertireoidismo',0,'O T4 é normal.')],
+ tx:[tc('t_flu','Soro na veia (fluidoterapia)',1),tc('t_kcl','Repor potássio no soro',1),
+  tc('t_ins','Insulina de ação rápida, em dose baixa',1,'Insulina antes do soro e do potássio derruba ainda mais o potássio.',['t_flu','t_kcl']),
+  tc('t_mon','Medir a glicemia de hora em hora',1),
+  tc('t_alta','Dar insulina e mandar para casa',0,'Um paciente tão grave precisa ficar internado.'),
+  tc('t_cort','Corticoide',0,'O corticoide atrapalha a ação da insulina.')],
+ outcome(s){
+  if(s.dead)return['obito','Demorou demais. Tom precisava de soro logo no início do atendimento.'];
+  if(s.p('t_alta'))return['obito','Tom voltou no dia seguinte em coma, muito desidratado e com acidose.'];
+  if(s.p('t_ins')&&(s.before('t_ins','t_flu')||s.before('t_ins','t_kcl')))return['ruim','A insulina puxou o potássio para dentro das células. Tom ficou muito fraco e teve arritmia.'];
+  if(s.p('t_cort'))return['ruim','O corticoide atrapalhou a insulina e a cetoacidose piorou.'];
+  if(!s.p('t_ins'))return['ruim','Sem insulina, o corpo continuou produzindo corpos cetônicos e a acidose não melhorou.'];
+  if(!s.p('t_mon'))return['ressalva','Tom melhorou, mas teve uma queda forte de glicose na internação. Monitorar faz parte do tratamento.'];
+  return['bom','Tom se recuperou em 2 a 3 dias e teve alta com insulina e dieta própria. Gatos tratados cedo podem até entrar em remissão.'];},
+ key:'Dar soro e repor o potássio antes da insulina.',
+ licao:'Sem insulina, o corpo quebra gordura e forma corpos cetônicos, que deixam o sangue ácido. O açúcar na urina puxa água e potássio. Como a insulina leva o potássio para dentro das células, o potássio é corrigido antes dela.',
+ hints:['Comece pelo básico: sede, xixi e peso dizem muito no gato.','Ele está desidratado e vomitando: veja o açúcar no sangue e na urina, e os eletrólitos.','Antes da insulina, cuide do soro e do potássio.'],
+ emerg:'Ele está desidratado e piorando. Comece o soro na veia agora!'},
+
+{id:'rex',nome:'Rex',esp:'cao',doenca:'Insulinoma',bonus:1,
+ resumo:'Boxer, macho, 9 anos, 30 kg',
+ fala:'Ele teve uma convulsão depois do passeio. Outras vezes já ficou meio bobo e cambaleando.',
+ stab:50,decay:5,stabilizers:['t_dex'],
+ alerta:'Urgente: Rex piora a cada carta até receber glicose.',
+ anam:[a('q_quando','Quando as crises acontecem?','Depois de exercício ou quando fica muito tempo sem comer.','E'),
+  a('q_come','Ele melhora depois de comer?','Sim, come e volta ao normal.','E'),
+  a('q_med','Ele usa insulina ou algum remédio?','Nunca usou insulina nem remédio.','U'),
+  a('q_tox','Pode ter comido algo tóxico?','Não tem chiclete nem adoçante em casa.','U'),VAC],
+ fis:[f('f_geral','Avaliação geral','Desorientado e fraco, mas consciente.','E'),
+  f('f_neuro','Exame neurológico','Sem sinais de lesão no cérebro.','U'),
+  f('f_abd','Palpar o abdômen','Normal.','N')],
+ exm:[x('x_glic','Glicemia',20,'Glicose: 38 mg/dL ↓↓\n(normal 70–120)','E',['x_ins']),
+  x('x_ins','Insulina no sangue',180,'Insulina alta mesmo com a glicose baixa:\nalgo está produzindo insulina demais.','E'),
+  x('x_hemo','Hemograma',60,'Normal.','U'),
+  x('x_us','Ultrassom do abdômen',200,'Nódulo no pâncreas.','U'),RX],
+ dx:[d('d_ins','Insulinoma (tumor que produz insulina)',20),d('d_epi','Epilepsia',0,'A glicose baixa explica as crises.'),
+  d('d_add','Doença de Addison',0,'Os eletrólitos não sugerem.'),d('d_xil','Intoxicação por adoçante',0,'Ele não teve contato.')],
+ tx:[tc('t_dex','Glicose na veia em gotejamento contínuo',1),tc('t_dieta','Refeições pequenas e frequentes',1),
+  tc('t_cir','Encaminhar para cirurgia do pâncreas',1,'Estabilize a glicose antes da cirurgia.',['t_dex']),
+  tc('t_bolus','Várias doses rápidas de glicose concentrada',0,'O tumor responde liberando ainda mais insulina.'),
+  tc('t_conv','Só remédio para convulsão',0,'Não corrige a glicose baixa.')],
+ outcome(s){
+  if(s.dead)return['obito','A glicose baixa por tempo demais lesionou o cérebro de Rex.'];
+  if(!s.p('t_dex'))return['ruim','Sem glicose contínua, Rex continuou tendo crises.'];
+  if(s.p('t_bolus'))return['ressalva','Rex estabilizou, mas as doses rápidas causaram novas quedas de glicose no caminho.'];
+  if(!s.p('t_cir'))return['ressalva','Rex ficou estável com remédios e dieta, mas sem cirurgia o tumor seguirá crescendo.'];
+  return['bom','Rex ficou estável e foi operado. O tumor costuma ser maligno, então ele seguirá em acompanhamento.'];},
+ key:'Dar glicose em gotejamento contínuo, sem picos.',
+ licao:'O insulinoma é um tumor do pâncreas que libera insulina sem controle, mesmo com a glicose baixa. As crises aparecem no jejum e no exercício e melhoram com comida.',
+ hints:['Crises depois de exercício ou jejum: pense no açúcar do sangue.','Glicose baixa? Veja se a insulina está alta ao mesmo tempo.','Dê glicose aos poucos, sem picos.'],
+ emerg:'Rex está com a glicose baixa e piorando: glicose na veia agora!'},
+
+{id:'luna',nome:'Luna',esp:'cao',doenca:'Crise de Addison',
+ resumo:'Cadela SRD, castrada, 4 anos, 18 kg',
+ fala:'Ela desmaiou em casa, está muito fraca, vomitou e teve diarreia escura.',
+ stab:45,decay:10,stabilizers:['t_flu'],
+ alerta:'Emergência: Luna piora a cada carta até receber soro.',
+ anam:[a('q_antes','Isso já aconteceu antes?','Umas 3 vezes este ano. Tomou soro e melhorou.','E'),
+  a('q_est','Ela passou por algum estresse?','Ficou num hotelzinho na semana passada.','U'),
+  a('q_vom','Vomitou ou teve diarreia?','Vomitou e teve diarreia escura hoje.','U'),
+  a('q_med','Usa algum remédio?','Nenhum.','U'),VAC],
+ fis:[f('f_geral','Avaliação geral','Em choque: fraca, desidratada e com o coração batendo devagar (60 bpm).','E'),
+  f('f_aus','Auscultar o coração','Batimentos lentos e fracos.','U'),
+  f('f_abd','Palpar o abdômen','Dor leve.','N')],
+ exm:[x('x_ele','Eletrólitos (sódio e potássio)',80,'Sódio: baixo ↓\nPotássio: muito alto ↑↑\nRelação Na:K = 16 (normal acima de 27)','E'),
+  x('x_acth','Teste hormonal do cortisol (ACTH)',200,'Cortisol quase zero, mesmo após o estímulo:\nconfirma falta de cortisol.','E'),
+  x('x_glic','Glicemia',20,'62 mg/dL ↓ (baixa)','U'),
+  x('x_hemo','Hemograma',60,'Sem sinais de estresse —\nestranho para um animal tão doente.','U'),
+  x('x_bioq','Função renal',120,'Ureia e creatinina altas pela desidratação.','N'),
+  x('x_rx','Raio-X de tórax',150,'Coração pequeno por falta de volume.','X')],
+ dx:[d('d_add','Doença de Addison em crise',20),d('d_rim','Doença renal',0,'A ureia alta vem da desidratação.'),
+  d('d_gast','Gastroenterite',5,'Explica o vômito e a diarreia, mas não o potássio alto.'),d('d_cush','Síndrome de Cushing',0,'É o contrário: aqui falta cortisol.')],
+ tx:[tc('t_flu','Soro na veia (NaCl 0,9%) imediatamente',1),tc('t_glic','Glicose na veia',1),
+  tc('t_cort','Dexametasona na veia (após coletar o exame)',1),
+  tc('t_man','Tratamento contínuo com hormônios',1),
+  tc('t_kcl','Soro com potássio',0,'O potássio dela já está muito alto.'),
+  tc('t_alta','Remédio para vômito e alta',0,'Isso trata só o sintoma.')],
+ outcome(s){
+  if(s.dead)return['obito','Luna teve parada cardíaca pelo potássio alto. Na crise de Addison, o soro vem antes de tudo.'];
+  if(s.p('t_kcl'))return['obito','O potássio a mais no soro causou uma arritmia fatal.'];
+  if(s.p('t_alta')||!s.p('t_man'))return['ruim','Luna melhorou como das outras vezes, mas voltou em crise semanas depois sem o tratamento contínuo.'];
+  if(!s.p('t_glic')&&!s.p('t_cort'))return['ressalva','Luna sobreviveu, mas a recuperação foi lenta sem glicose e sem corticoide nas primeiras horas.'];
+  return['bom','Luna se recuperou em 24 horas. Com o tratamento hormonal contínuo, terá uma vida normal.'];},
+ key:'Começar o soro com NaCl 0,9% logo no início, antes de investigar.',
+ licao:'Sem os hormônios da adrenal, o corpo perde sódio e acumula potássio. O potássio alto deixa o coração lento e pode pará-lo. Sem cortisol, surgem vômito, diarreia e glicose baixa.',
+ hints:['É emergência: estabilize antes de perguntar muito.','Coração lento num animal em choque? Olhe o potássio.','Depois do soro, reponha os hormônios que estão faltando.'],
+ emerg:'Luna está em choque. Soro na veia agora!'},
+
+{id:'mimi',nome:'Mimi',esp:'gato',doenca:'Hipertireoidismo',
+ resumo:'Gata, castrada, 13 anos, 3,2 kg (pesava 4,5 kg)',
+ fala:'Ela come o dobro e só emagrece. Está agitada e mia de madrugada.',
+ stab:70,decay:0,stabilizers:[],
+ anam:[a('q_apet','Como está o apetite?','Come muito, pede comida toda hora.','E'),
+  a('q_peso','Ela emagreceu?','Muito, mesmo comendo bastante.','E'),
+  a('q_comp','Mudou o comportamento?','Está agitada e mia alto de madrugada.','U'),
+  a('q_vom','Vomitou ou teve diarreia?','Vomita quase todo dia.','U'),
+  a('q_agua','Está bebendo mais água?','Bebe e faz xixi mais que antes.','U'),VAC],
+ fis:[f('f_cerv','Palpar o pescoço','Caroço no pescoço: tireoide aumentada.','E'),
+  f('f_geral','Avaliação geral','Coração acelerado (240 bpm) e muito magra.','U'),
+  f('f_rim','Palpar os rins','Rins pequenos e irregulares.','U'),
+  f('f_pele','Examinar o pelo','Pelo embolado e desgrenhado.','N')],
+ exm:[x('x_t4','Dosagem de T4 (tireoide)',90,'T4: 8,9 ↑↑ (normal 0,8–4,0)','E'),
+  x('x_uri','Exame de urina',50,'Urina pouco concentrada ↓\n(sinal de rim fraco)','E'),
+  x('x_bioq','Função renal',120,'Creatinina no limite do normal\n(a gata está muito magra)','U'),
+  x('x_glic','Glicemia',20,'Normal.','N'),RX],
+ dx:[d('d_hdrc','Hipertireoidismo com rim fraco',20),d('d_hiper','Hipertireoidismo',12,'Faltou perceber a doença renal escondida.'),
+  d('d_dm','Diabetes',0,'A glicemia é normal.'),d('d_drc','Só doença renal',0,'O T4 alto aponta para a tireoide.')],
+ tx:[tc('t_met','Metimazol em dose baixa',1),tc('t_rev','Retorno em 2–4 semanas (T4 e rim)',1),
+  tc('t_pa','Controlar a pressão se continuar alta',1),
+  tc('t_alta','Metimazol em dose alta',0,'Baixar o T4 rápido demais descompensa o rim.'),
+  tc('t_cir','Cirurgia da tireoide imediata',0,'Primeiro teste o remédio e veja como o rim reage.')],
+ outcome(s){
+  if(s.p('t_alta')||s.p('t_cir'))return['ruim','O T4 caiu rápido demais, o rim perdeu força e Mimi passou mal.'];
+  if(!s.p('t_met'))return['obito','Sem tratamento, Mimi continuou emagrecendo e o coração não aguentou.'];
+  if(!(s.p('x_uri')||s.p('x_bioq'))||!s.p('t_rev'))return['ressalva','Deu certo, mas por sorte: a doença renal só apareceu no retorno.'];
+  return['bom','Mimi ganhou peso e ficou calma. O rim ficou estável com o acompanhamento.'];},
+ key:'Avaliar o rim e começar o metimazol em dose baixa.',
+ licao:'O excesso de hormônio da tireoide acelera tudo: coração, apetite e perda de peso. Ele também força o rim a filtrar mais e pode esconder uma doença renal, que aparece quando a tireoide é controlada.',
+ hints:['Gata idosa que come muito e emagrece: palpe o pescoço.','O hipertireoidismo pode esconder doença renal. Avalie o rim.','Comece devagar com o remédio e reavalie.']},
+
+{id:'thor',nome:'Thor',esp:'cao',doenca:'Gastrinoma',
+ resumo:'Cão SRD, macho castrado, 9 anos, 22 kg (pesava 26 kg)',
+ fala:'Ele vomita quase todo dia, às vezes com sangue, e as fezes estão pretas.',
+ stab:70,decay:0,stabilizers:[],
+ anam:[a('q_vom','Como é o vômito?','Quase todo dia, às vezes com sangue ou parecendo borra de café.','E'),
+  a('q_fezes','Como estão as fezes?','Pretas e pastosas, há umas semanas.','E'),
+  a('q_med','Tomou anti-inflamatório ou algum remédio?','Nenhum remédio. Nunca tomou anti-inflamatório.','E'),
+  a('q_peso','Ele emagreceu?','Perdeu uns 4 kg em dois meses.','U'),
+  a('q_apet','Como está o apetite?','Come, mas logo depois vomita.','U'),
+  a('q_agua','Está bebendo mais água?','Normal.','N'),VAC],
+ fis:[f('f_geral','Avaliação geral','Gengiva pálida, levemente desidratado e magro.','E'),
+  f('f_abd','Palpar o abdômen','Dor na parte da frente da barriga (região do estômago).','U'),
+  f('f_retal','Toque retal','Fezes pretas (melena): sangue digerido.','U'),
+  f('f_pele','Examinar pele e pelo','Normal.','N')],
+ exm:[x('x_hemo','Hemograma',60,'Anemia ↓ (perda de sangue)','E'),
+  x('x_gastrina','Dosagem de gastrina',180,'Gastrina: muito alta ↑↑\n(mesmo com o estômago em jejum)','E'),
+  x('x_endo','Endoscopia',250,'Úlceras no estômago e no duodeno.','U'),
+  x('x_us','Ultrassom do abdômen',200,'Nódulo pequeno no pâncreas.','U'),
+  x('x_glic','Glicemia',20,'Normal.','N'),
+  x('x_bioq','Bioquímica',120,'Albumina um pouco baixa.','N'),RX],
+ dx:[d('d_gas','Gastrinoma (tumor que produz gastrina)',20),d('d_ulc','Úlcera por anti-inflamatório',5,'Ele nunca tomou anti-inflamatório, e a gastrina está muito alta.'),
+  d('d_gast','Gastroenterite simples',0,'Não explica as úlceras nem a gastrina alta.'),d('d_ins','Insulinoma',0,'A glicose está normal; o problema é ácido demais no estômago.')],
+ tx:[tc('t_ome','Omeprazol (reduz o ácido do estômago)',1),tc('t_sucra','Sucralfato (protege as úlceras)',1),
+  tc('t_cir','Cirurgia para retirar o tumor',1,'Proteja o estômago antes de operar.',['t_ome']),
+  tc('t_rev','Retorno com novo hemograma',1),
+  tc('t_aine','Anti-inflamatório para a dor',0,'Anti-inflamatório piora as úlceras e o sangramento.'),
+  tc('t_cort','Corticoide',0,'O corticoide aumenta o risco de úlcera.')],
+ outcome(s){
+  if(s.p('t_aine')||s.p('t_cort'))return['ruim','O remédio piorou as úlceras e Thor voltou com um sangramento forte.'];
+  if(!s.p('t_ome'))return['ruim','Sem reduzir o ácido, as úlceras continuaram sangrando.'];
+  if(!s.p('t_cir'))return['ressalva','Thor melhorou com o omeprazol, mas o tumor continua produzindo gastrina e os sinais devem voltar.'];
+  if(!s.p('x_gastrina'))return['ressalva','Deu certo, mas sem dosar a gastrina o diagnóstico ficou sem confirmação.'];
+  return['bom','O vômito parou, as fezes voltaram ao normal e Thor foi operado. O tumor costuma ser maligno, então ele segue em acompanhamento.'];},
+ key:'Ligar úlceras sem causa aparente à gastrina alta e proteger o estômago.',
+ licao:'A gastrina é o hormônio que manda o estômago produzir ácido. No gastrinoma, um tumor no pâncreas libera gastrina sem parar. O excesso de ácido causa úlceras, vômito com sangue e fezes pretas (sangue digerido).',
+ hints:['Vômito com sangue e fezes pretas: pense em úlcera. Pergunte sobre remédios.','Sem anti-inflamatório? Investigue o hormônio que manda o estômago produzir ácido.','Primeiro reduza o ácido do estômago, depois trate a causa.']},
+
+{id:'bob',nome:'Bob',esp:'cao',doenca:'Hipoglicemia juvenil',
+ resumo:'Filhote yorkshire, macho, 10 semanas, 0,8 kg',
+ fala:'Ele teve diarreia ontem, não quis comer hoje e agora está tremendo e mole.',
+ stab:45,decay:10,stabilizers:['t_glic'],
+ alerta:'Emergência: Bob piora a cada carta até receber glicose.',
+ anam:[a('q_comeu','Quando ele comeu pela última vez?','Ontem de manhã. Hoje não quis nada.','E'),
+  a('q_diar','Como está a diarreia?','Mole desde ontem. Vi uns vermes nas fezes.','E'),
+  a('q_verm','Ele já foi vermifugado?','Ainda não, chegou em casa semana passada.','U'),
+  a('q_trem','Quando começaram os tremores?','Hoje cedo, e ele ficou meio bobo.','U'),
+  a('q_frio','Ele ficou em lugar frio?','Dormiu na varanda essa noite.','U'),
+  a('q_vac','Ele já tomou vacina?','Só a primeira dose.','N')],
+ fis:[f('f_geral','Avaliação geral','Fraco, tremendo, temperatura 36,5 °C (baixa).','E'),
+  f('f_gengiva','Examinar a gengiva','Rosa-pálida e um pouco seca.','U'),
+  f('f_abd','Palpar o abdômen','Barriga um pouco inchada, com gases.','U'),
+  f('f_neuro','Exame neurológico','Desorientado, sem sinais de lesão no cérebro.','N')],
+ exm:[x('x_glic','Glicemia',20,'Glicose: 35 mg/dL ↓↓\n(normal 70–120)','E'),
+  x('x_copro','Exame de fezes',40,'Ovos de vermes (Ancylostoma e Toxocara).','E'),
+  x('x_hemo','Hemograma',60,'Anemia leve.','U'),
+  x('x_ins','Insulina no sangue',180,'Baixa — o esperado com glicose baixa.\nNão é tumor.','N'),
+  x('x_bioq','Bioquímica',120,'Proteína um pouco baixa.','N'),
+  x('x_rx','Raio-X de tórax',150,'Sem alterações.','X')],
+ dx:[d('d_hipo','Hipoglicemia juvenil (pouca reserva + verminose)',20),
+  d('d_parvo','Parvovirose',5,'Sempre lembrar em filhote com diarreia, mas aqui os vermes e o jejum explicam o quadro.'),
+  d('d_ins','Insulinoma',0,'Insulinoma é de cão idoso; aqui a insulina está baixa.'),
+  d('d_epi','Epilepsia',0,'A glicose baixa explica os tremores.')],
+ tx:[tc('t_glic','Glicose na veia (ou na gengiva, se não houver acesso)',1),tc('t_aquec','Aquecer o filhote',1),
+  tc('t_alim','Refeições pequenas a cada 3 horas',1,'Primeiro corrija a glicose: ele está fraco demais para comer.',['t_glic']),
+  tc('t_verm','Vermífugo',1,'Vermifugue depois de estabilizar a glicose.',['t_glic']),
+  tc('t_jejum','Jejum de 24 h por causa da diarreia',0,'Jejum longo derruba a glicose do filhote.'),
+  tc('t_conv','Só remédio para convulsão',0,'Não corrige a glicose baixa.')],
+ outcome(s){
+  if(s.dead)return['obito','A glicose baixa por tempo demais lesionou o cérebro de Bob. Filhote em hipoglicemia precisa de glicose imediata.'];
+  if(s.p('t_jejum'))return['ruim','O jejum derrubou a glicose de novo e Bob voltou a tremer.'];
+  if(!s.p('t_glic'))return['ruim','Sem glicose, Bob continuou tremendo e piorando.'];
+  if(!s.p('t_alim'))return['ressalva','Bob melhorou, mas sem refeições frequentes a glicose voltou a cair em casa.'];
+  if(!s.p('t_verm'))return['ressalva','Bob melhorou, mas sem vermífugo a diarreia e a perda de nutrientes continuam.'];
+  if(!s.p('t_aquec'))return['ressalva','Bob se recuperou mais devagar porque continuou com frio.'];
+  return['bom','Bob voltou a ficar esperto em minutos, comeu e foi para casa vermifugado, com refeições frequentes.'];},
+ key:'Dar glicose imediatamente e depois tratar a causa: jejum, frio e vermes.',
+ licao:'Filhotes de raças pequenas têm pouca reserva de glicogênio no fígado. Jejum, frio, diarreia e vermes gastam essa reserva rápido. O cérebro depende da glicose e começa a falhar: tremores, fraqueza e convulsões.',
+ hints:['Filhote tremendo: confira o açúcar do sangue antes de tudo.','Pergunte quando ele comeu e como está a diarreia.','Depois da glicose: calor, comida frequente e vermífugo.'],
+ emerg:'Bob está com a glicose muito baixa. Glicose agora!'},
+
+{id:'kiko',nome:'Kiko',esp:'cao',doenca:'Pancreatite aguda',bonus:1,
+ resumo:'Schnauzer miniatura, macho, 8 anos, 11 kg, acima do peso',
+ fala:'Ele comeu restos do churrasco ontem. Hoje vomitou várias vezes e não quer sair do canto.',
+ stab:55,decay:5,stabilizers:['t_flu'],
+ alerta:'Urgente: Kiko piora a cada carta até receber soro.',
+ anam:[a('q_comeu','O que exatamente ele comeu?','Gordura de picanha e linguiça.','E'),
+  a('q_dor','Ele parece sentir dor?','Fica com o peito no chão e o bumbum para cima.','E'),
+  a('q_vom','Quantas vezes vomitou?','Umas 6 vezes desde a noite.','U'),
+  a('q_diar','Teve diarreia?','Um pouco, as fezes estão moles.','U'),
+  a('q_agua','Ele bebe mais água há semanas?','Não, sempre bebeu normal.','U'),
+  a('q_med','Toma algum remédio?','Nenhum.','N'),VAC],
+ fis:[f('f_geral','Avaliação geral','Febre leve (39,4 °C), desidratado, coração acelerado.','E'),
+  f('f_abd','Palpar o abdômen','Dor forte na parte da frente da barriga.','E'),
+  f('f_post','Observar a postura','Posição de prece: peito no chão e quadril para cima.','U'),
+  f('f_pele','Examinar pele e pelo','Normal.','N')],
+ exm:[x('x_lip','Lipase pancreática (teste rápido)',120,'Lipase pancreática: muito alta ↑↑\n(confirma pancreatite)','E'),
+  x('x_us','Ultrassom do abdômen',200,'Pâncreas inchado e gordura ao redor inflamada.','U'),
+  x('x_glic','Glicemia',20,'Um pouco alta (estresse e dor).','U'),
+  x('x_hemo','Hemograma',60,'Leucócitos altos ↑ (inflamação).','U'),
+  x('x_ele','Eletrólitos (sódio e potássio)',80,'Potássio um pouco baixo (pelos vômitos).','U'),
+  x('x_rx','Raio-X do abdômen',150,'Sem corpo estranho visível.','N'),
+  x('x_t4','Dosagem de T4 (tireoide)',90,'Normal.','X')],
+ dx:[d('d_panc','Pancreatite aguda',20),d('d_ce','Obstrução por corpo estranho',5,'Sempre pensar depois de restos de comida, mas a lipase alta aponta o pâncreas.'),
+  d('d_gast','Gastroenterite simples',5,'Não explica a dor forte e a lipase alta.'),d('d_dm','Diabetes',0,'A glicose está só um pouco alta, por estresse.')],
+ tx:[tc('t_flu','Soro na veia',1),tc('t_anal','Analgesia (opioide)',1),tc('t_anti','Antiemético (maropitant)',1),
+  tc('t_alim','Voltar a comer cedo, com ração de pouca gordura',1,'Controle o vômito antes de oferecer comida.',['t_anti']),
+  tc('t_jej','Jejum de vários dias',0,'Hoje se sabe que voltar a comer cedo ajuda o intestino a se recuperar.'),
+  tc('t_gord','Petisco para animar a comer',0,'Gordura piora a pancreatite.')],
+ outcome(s){
+  if(s.dead)return['obito','A desidratação e a inflamação avançaram rápido demais. Kiko precisava de soro e analgesia logo no início.'];
+  if(s.p('t_gord'))return['ruim','A gordura do petisco reativou a pancreatite.'];
+  if(!s.p('t_flu'))return['ruim','Sem soro, Kiko continuou desidratado e piorou.'];
+  if(!s.p('t_anal'))return['ressalva','Kiko sobreviveu, mas sentiu muita dor sem analgesia, e a dor também atrapalha a recuperação.'];
+  if(s.p('t_jej'))return['ressalva','Kiko melhorou, mas o jejum longo atrasou a recuperação do intestino.'];
+  if(!s.p('t_alim'))return['ressalva','Kiko melhorou, mas foi para casa sem dieta de pouca gordura e pode ter nova crise.'];
+  return['bom','Kiko melhorou em 3 dias e foi para casa com ração de pouca gordura. Nada de restos de churrasco!'];},
+ key:'Hidratar e tirar a dor primeiro, e cortar a gordura da dieta.',
+ licao:'O pâncreas tem duas partes: a exócrina, que produz enzimas digestivas, e a endócrina (ilhotas), que produz insulina e glucagon. Na pancreatite, as enzimas se ativam dentro do próprio pâncreas e o inflamam. Crises repetidas podem destruir as ilhotas e levar ao diabetes.',
+ hints:['Comeu gordura e está com dor na barriga: pense no pâncreas.','Peça o teste de lipase pancreática.','Soro e analgesia primeiro; depois, comida com pouca gordura.'],
+ emerg:'Kiko está desidratado e com dor. Soro na veia agora!'},
+
+{id:'duque',nome:'Duque',esp:'cao',doenca:'Insuficiência pancreática exócrina (não é endócrino)',
+ resumo:'Pastor-alemão, macho, 2 anos, 24 kg (deveria ter 32 kg)',
+ fala:'Ele come o dobro e continua magro. As fezes são enormes, amareladas e com cheiro forte.',
+ stab:80,decay:0,stabilizers:[],
+ anam:[a('q_fezes','Como são as fezes?','Muitas, volumosas, amareladas e com aspecto de gordura.','E'),
+  a('q_apet','Como está o apetite?','Come demais, até as próprias fezes.','E'),
+  a('q_agua','Está bebendo mais água?','Não, bebe normal.','E'),
+  a('q_peso','Ele emagreceu?','Muito, dá para ver as costelas.','U'),
+  a('q_vom','Ele vomita?','Não.','U'),
+  a('q_verm','Está vermifugado?','Sim, no mês passado.','U'),VAC],
+ fis:[f('f_geral','Avaliação geral','Magro (escore 3/9), mas alerta e ativo.','E'),
+  f('f_pele','Examinar pele e pelo','Pelo opaco e sem brilho.','U'),
+  f('f_abd','Palpar o abdômen','Barriga com gases, sem dor.','U'),
+  f('f_cerv','Palpar o pescoço','Normal.','N')],
+ exm:[x('x_tli','TLI (teste do pâncreas exócrino)',150,'TLI: muito baixo ↓↓\n(o pâncreas quase não produz enzimas)','E'),
+  x('x_glic','Glicemia',20,'Normal (não é diabetes).','E'),
+  x('x_b12','Vitamina B12',100,'Baixa ↓','U'),
+  x('x_copro','Exame de fezes',40,'Sem vermes; muita gordura não digerida.','U'),
+  x('x_hemo','Hemograma',60,'Normal.','N'),
+  x('x_us','Ultrassom do abdômen',200,'Pâncreas pequeno.','N'),
+  x('x_cort','Teste hormonal do cortisol',200,'Normal.','X')],
+ dx:[d('d_ipe','Insuficiência pancreática exócrina',20),d('d_dm','Diabetes',0,'A glicose é normal: falta enzima digestiva, não insulina.'),
+  d('d_verm','Verminose',0,'O exame de fezes não mostrou vermes.'),d('d_hiper','Hipertireoidismo',0,'É raríssimo em cão jovem, e o TLI explica o quadro.')],
+ tx:[tc('t_enz','Enzimas pancreáticas misturadas na comida',1),tc('t_b12','Repor vitamina B12',1),
+  tc('t_dieta','Ração de fácil digestão',1),tc('t_rev','Retorno para pesar e reavaliar',1),
+  tc('t_ins','Insulina',0,'A parte endócrina funciona bem: falta enzima, não insulina.'),
+  tc('t_menos','Diminuir a quantidade de comida',0,'Ele já está desnutrido; o problema é digerir, não comer demais.')],
+ outcome(s){
+  if(s.p('t_ins'))return['ruim','Duque recebeu insulina sem precisar e teve hipoglicemia.'];
+  if(!s.p('t_enz'))return['ruim','Sem as enzimas, Duque continuou sem digerir a comida e emagrecendo.'];
+  if(s.p('t_menos'))return['ruim','Com menos comida, Duque emagreceu ainda mais.'];
+  if(!s.p('x_tli'))return['ressalva','Deu certo, mas sem o TLI o diagnóstico ficou sem confirmação.'];
+  if(!s.p('t_b12'))return['ressalva','Duque ganhou peso, mas a falta de B12 deixou a recuperação mais lenta.'];
+  return['bom','Em poucas semanas as fezes ficaram normais e Duque ganhou 5 kg.'];},
+ key:'Perceber que faltavam enzimas digestivas, e não insulina.',
+ licao:'O pâncreas exócrino produz as enzimas que digerem gordura, proteína e amido. Sem elas, a comida passa sem ser absorvida: fezes volumosas e gordurosas, fome e emagrecimento. É diferente do diabetes, em que falta insulina (pâncreas endócrino) e a glicose fica alta.',
+ hints:['Come muito e emagrece: confira a glicose e o aspecto das fezes.','Fezes gordurosas e glicose normal? Teste a parte do pâncreas que produz enzimas.','O tratamento é repor o que falta: enzimas na comida.']}
+];
+
+/* ---------- arte das cartas ---------- */
+const N='#1b2340';
+const o=(s)=>`stroke="${N}" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" ${s||''}`;
+const EMB={
+ water:`<path d="M30 40h40l-6 13H36z" fill="#5bc0ff" ${o()}/><path d="M50 9c7 10 10 14 10 19a10 10 0 0 1-20 0c0-5 3-9 10-19z" fill="#bfe8ff" ${o()}/><circle cx="46" cy="27" r="2.4" fill="#fff"/>`,
+ pee:`<rect x="38" y="20" width="24" height="33" rx="4" fill="#fff" ${o()}/><path d="M40 33h20v16a2 2 0 0 1-2 2H42a2 2 0 0 1-2-2z" fill="#ffd84d"/><rect x="38" y="20" width="24" height="33" rx="4" fill="none" ${o()}/><path d="M35 20h30" ${o()}/>`,
+ food:`<path d="M26 34h48c0 12-10 19-24 19S26 46 26 34z" fill="#ff6b6b" ${o()}/><circle cx="40" cy="31" r="4.5" fill="#c98a4a" ${o('stroke-width="2"')}/><circle cx="50" cy="28" r="4.5" fill="#c98a4a" ${o('stroke-width="2"')}/><circle cx="60" cy="31" r="4.5" fill="#c98a4a" ${o('stroke-width="2"')}/>`,
+ scale:`<rect x="28" y="38" width="44" height="14" rx="4" fill="#9aa5ff" ${o()}/><path d="M34 38c0-14 32-14 32 0" fill="#fff" ${o()}/><path d="M50 37l7-9" ${o()}/><circle cx="50" cy="37" r="2.5" fill="${N}"/>`,
+ pill:`<g transform="rotate(-35 50 32)"><rect x="30" y="23" width="40" height="18" rx="9" fill="#fff" ${o()}/><path d="M50 23h11a9 9 0 0 1 0 18H50z" fill="#ff6b8b" ${o()}/></g><circle cx="70" cy="14" r="3" fill="#fff" ${o('stroke-width="1.6"')}/>`,
+ vomit:`<path d="M36 18c10-6 26-2 28 12 2 13-9 22-21 20-10-2-14-12-8-18 5-5 13-1 11 4" fill="#9be38a" ${o()}/><path d="M43 32c3-3 8-1 6 3" ${o('fill="none"')}/>`,
+ fur:`<rect x="28" y="16" width="44" height="10" rx="3" fill="#ffc83d" ${o()}/><path d="M33 26v14M39 26v18M45 26v14M51 26v18M57 26v14M63 26v18M69 26v12" ${o()}/>`,
+ heart:`<path d="M50 52C30 40 24 30 28 22c4-8 15-8 22 1 7-9 18-9 22-1 4 8-2 18-22 30z" fill="#ff4d6d" ${o()}/><path d="M30 33h10l4-8 5 15 4-9h17" stroke="#fff" stroke-width="2.8" fill="none" stroke-linejoin="round" stroke-linecap="round"/>`,
+ thermo:`<rect x="45" y="10" width="10" height="34" rx="5" fill="#fff" ${o()}/><circle cx="50" cy="47" r="8" fill="#ff4d6d" ${o()}/><rect x="48" y="24" width="4" height="20" fill="#ff4d6d"/>`,
+ eye:`<path d="M24 32c14-18 38-18 52 0-14 18-38 18-52 0z" fill="#fff" ${o()}/><circle cx="50" cy="32" r="9" fill="#5bc0ff" ${o()}/><circle cx="50" cy="32" r="4" fill="${N}"/><circle cx="47" cy="29" r="2" fill="#fff"/>`,
+ thyroid:`<path d="M50 22c-4-10-22-12-22 4 0 12 12 20 22 14 10 6 22-2 22-14 0-16-18-14-22-4z" fill="#ff8fb8" ${o()}/><path d="M50 22v18" ${o()}/>`,
+ hand:`<path d="M36 50V30a4 4 0 0 1 8 0v-8a4 4 0 0 1 8 0v4a4 4 0 0 1 8 0v4a4 4 0 0 1 8 0v14c0 8-6 12-14 12h-6c-6 0-12-4-12-6z" fill="#ffd2a8" ${o()}/>`,
+ nose:`<path d="M38 26c0-8 24-8 24 0 0 8-6 12-12 12s-12-4-12-12z" fill="${N}"/><circle cx="45" cy="27" r="2.6" fill="#fff"/><path d="M66 22c6 0 8 4 4 6M68 32c8 0 10 5 4 7M30 22c-6 0-8 4-4 6" stroke="#9be38a" stroke-width="2.6" fill="none" stroke-linecap="round"/>`,
+ cal:`<rect x="30" y="14" width="40" height="38" rx="5" fill="#fff" ${o()}/><path d="M30 25h40" ${o()}/><rect x="30" y="14" width="40" height="11" rx="5" fill="#ff6b6b" ${o()}/><path d="M38 10v8M62 10v8" ${o()}/><circle cx="42" cy="34" r="2.6" fill="${N}"/><circle cx="50" cy="34" r="2.6" fill="${N}"/><circle cx="58" cy="34" r="2.6" fill="#ff6b6b"/><circle cx="42" cy="43" r="2.6" fill="${N}"/>`,
+ house:`<path d="M28 32L50 13l22 19" fill="#ff6b6b" ${o()}/><rect x="33" y="30" width="34" height="22" fill="#ffe7b3" ${o()}/><rect x="45" y="38" width="10" height="14" fill="#c98a4a" ${o()}/>`,
+ syringe:`<g transform="rotate(-40 50 32)"><rect x="34" y="26" width="30" height="12" rx="2" fill="#dff4ff" ${o()}/><rect x="36" y="28" width="16" height="8" fill="#5bc0ff"/><path d="M64 32h12M28 32h6M28 25v14" ${o()}/><path d="M40 26v-3M46 26v-3M52 26v-3" ${o('stroke-width="2"')}/></g>`,
+ iv:`<path d="M36 12h28v28a6 6 0 0 1-6 6H42a6 6 0 0 1-6-6z" fill="#dff4ff" ${o()}/><path d="M38 24h24v16a4 4 0 0 1-4 4H42a4 4 0 0 1-4-4z" fill="#8fd8ff"/><path d="M50 46v10" ${o()}/><path d="M44 18h12" stroke="#5bc0ff" stroke-width="2.4"/>`,
+ elec:`<circle cx="38" cy="32" r="13" fill="#ffd84d" ${o()}/><circle cx="64" cy="32" r="11" fill="#b38bff" ${o()}/><text x="38" y="37" text-anchor="middle" font-family="Lilita One,sans-serif" font-size="13" fill="${N}">Na</text><text x="64" y="36" text-anchor="middle" font-family="Lilita One,sans-serif" font-size="12" fill="${N}">K</text>`,
+ blood:`<path d="M50 8c9 13 14 19 14 26a14 14 0 0 1-28 0c0-7 5-13 14-26z" fill="#ff4d6d" ${o()}/><circle cx="45" cy="32" r="3" fill="#fff" opacity=".8"/>`,
+ tube:`<g transform="rotate(20 50 32)"><path d="M44 8h12v38a6 6 0 0 1-12 0z" fill="#fff" ${o()}/><path d="M44 28h12v18a6 6 0 0 1-12 0z" fill="#b38bff"/><path d="M44 8h12v38a6 6 0 0 1-12 0z" fill="none" ${o()}/><path d="M41 8h18" ${o()}/></g>`,
+ scan:`<rect x="26" y="12" width="48" height="34" rx="5" fill="#2b3566" ${o()}/><path d="M36 38c4-16 24-16 28 0" stroke="#7ef0d9" stroke-width="3" fill="none"/><circle cx="50" cy="30" r="5" fill="#7ef0d9" opacity=".7"/><path d="M44 46l-4 8h20l-4-8" fill="#9aa5ff" ${o()}/>`,
+ flask:`<path d="M44 10h12M46 10v14L32 50a3 3 0 0 0 3 4h30a3 3 0 0 0 3-4L54 24V10" fill="#fff" ${o()}/><path d="M38 40h24l6 10a3 3 0 0 1-3 4H35a3 3 0 0 1-3-4z" fill="#b38bff"/><path d="M46 10v14L32 50a3 3 0 0 0 3 4h30a3 3 0 0 0 3-4L54 24V10" fill="none" ${o()}/><path d="M68 16l2-5 2 5 5 2-5 2-2 5-2-5-5-2z" fill="#ffd84d" ${o('stroke-width="1.6"')}/>`,
+ scalpel:`<g transform="rotate(-30 50 32)"><rect x="22" y="28" width="32" height="8" rx="3" fill="#9aa5ff" ${o()}/><path d="M54 28h10c8 0 12 4 12 4s-6 4-14 4H54z" fill="#eef3ff" ${o()}/></g>`,
+ paw:`<ellipse cx="50" cy="40" rx="11" ry="9" fill="#c98a4a" ${o()}/><circle cx="36" cy="27" r="5" fill="#c98a4a" ${o()}/><circle cx="45" cy="20" r="5" fill="#c98a4a" ${o()}/><circle cx="55" cy="20" r="5" fill="#c98a4a" ${o()}/><circle cx="64" cy="27" r="5" fill="#c98a4a" ${o()}/>`,
+ kidney:`<path d="M40 14c-12 2-16 18-10 30 6 10 18 10 20 2 1-6-6-8-6-14s7-8 6-13c-1-4-5-6-10-5z" fill="#d2575f" ${o()}/><path d="M60 14c12 2 16 18 10 30-6 10-18 10-20 2" fill="#d2575f" ${o()}/>`,
+ adrenal:`<path d="M42 26c-12 2-14 16-8 24 6 6 16 4 16-2 0-5-6-7-5-12 1-4 4-6 3-9z" fill="#d2575f" ${o()}/><path d="M38 24l8-14 10 12z" fill="#ffd84d" ${o()}/><path d="M66 18l-3 6h6l-4 8" stroke="#ffc83d" stroke-width="2.6" fill="none" stroke-linecap="round"/>`,
+ pancreas:`<path d="M24 36c4-10 16-6 24-10s18-6 24 0c3 4-2 8-10 8s-14 6-24 8-16 0-14-6z" fill="#ffd28a" ${o()}/><rect x="62" y="14" width="12" height="12" rx="2" fill="#fff" ${o()}/><path d="M64 18h8" stroke="#cfd6f5" stroke-width="2"/>`,
+ brain:`<path d="M34 42c-8 0-10-10-4-13-3-8 5-14 11-10 2-6 14-6 16 0 6-4 14 2 11 10 6 3 4 13-4 13z" fill="#ffa6c9" ${o()}/><path d="M50 20v22M42 28c3 2 3 6 0 8M58 28c-3 2-3 6 0 8" ${o('fill="none" stroke-width="2"')}/>`,
+ liver:`<path d="M24 26c10-8 34-12 50-6 4 2 2 8-4 12-10 8-22 14-32 12-10-2-18-12-14-18z" fill="#a8553a" ${o()}/>`,
+ bug:`<circle cx="50" cy="32" r="13" fill="#9be38a" ${o()}/><path d="M50 15v-5M50 49v5M33 32h-5M67 32h5M38 20l-4-4M62 20l4-4M38 44l-4 4M62 44l4 4" ${o()}/><circle cx="45" cy="29" r="2.4" fill="${N}"/><circle cx="55" cy="29" r="2.4" fill="${N}"/><path d="M45 37q5 3 10 0" ${o('fill="none" stroke-width="2"')}/>`,
+ candy:`<rect x="38" y="24" width="24" height="16" rx="8" fill="#ff8fb8" ${o()}/><path d="M38 32l-10-8v16zM62 32l10-8v16z" fill="#ffd84d" ${o()}/>`,
+ flower:`<circle cx="50" cy="20" r="7" fill="#ffd84d" ${o()}/><circle cx="40" cy="30" r="7" fill="#ffd84d" ${o()}/><circle cx="60" cy="30" r="7" fill="#ffd84d" ${o()}/><circle cx="44" cy="41" r="7" fill="#ffd84d" ${o()}/><circle cx="56" cy="41" r="7" fill="#ffd84d" ${o()}/><circle cx="50" cy="32" r="6" fill="#ff8f3d" ${o()}/>`,
+ talk:`<path d="M26 14h48a5 5 0 0 1 5 5v20a5 5 0 0 1-5 5H46l-10 9v-9H26a5 5 0 0 1-5-5V19a5 5 0 0 1 5-5z" fill="#fff" ${o()}/><text x="50" y="37" text-anchor="middle" font-family="Lilita One,sans-serif" font-size="20" fill="#3d8bff">?</text>`,
+ steth:`<path d="M36 12v14a10 10 0 0 0 20 0V12" ${o('fill="none" stroke-width="3.2"')}/><path d="M46 36v6a10 10 0 0 0 20 0v-6" ${o('fill="none" stroke-width="3.2"')}/><circle cx="66" cy="32" r="6" fill="#9aa5ff" ${o()}/>`,
+ micro:`<path d="M44 12l10 6-10 18" ${o('fill="none" stroke-width="3.2"')}/><rect x="40" y="8" width="8" height="10" rx="2" fill="#9aa5ff" ${o()}/><path d="M30 52h40M50 44v8M36 44h28" ${o()}/><path d="M60 22a14 14 0 0 1-6 22" ${o('fill="none"')}/>`,
+ magnify:`<circle cx="45" cy="28" r="14" fill="#dff4ff" ${o()}/><path d="M55 38l12 12" ${o('stroke-width="5"')}/><path d="M39 28l4 4 8-8" stroke="#22a861" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+ cross:`<path d="M42 12h16v12h12v16H58v12H42V40H30V24h12z" fill="#fff" ${o()}/><path d="M46 18h8v10h10v8H54v10h-8V36H36v-8h10z" fill="#ff4d6d"/>`
+};
+const ART_RULES=[
+ [/exame de fezes|vermes|verminose|vermífugo/i,'bug'],
+ [/gastrina|TLI|lipase|B12|vitamina/i,'flask'],[/endoscopia/i,'scan'],
+ [/omeprazol|sucralfato|enzimas|antiemético|analgesia|opioide|anti-inflamatório/i,'pill'],
+ [/hipoglicemia/i,'blood'],[/aquecer|frio|tremor/i,'thermo'],[/p[aâ]ncre/i,'pancreas'],[/petisco|ração|refeiç/i,'food'],
+ [/fezes|úlcera|gastrinoma|gastroenterite|estômago/i,'vomit'],
+ [/postura|dor\b|sentir dor/i,'paw'],[/churrasco|comeu|gordura/i,'food'],
+ [/vacina/i,'syringe'],[/hotel|estresse|sai de casa|sai\b/i,'house'],
+ [/potássio|eletrólito|Na:K/i,'elec'],
+ [/soro|fluido|gotejamento|glicose na veia|dextrose/i,'iv'],
+ [/insulina no sangue/i,'flask'],[/insulina|injeção|dexametasona na veia/i,'syringe'],
+ [/hormonal|cortisol|ACTH|progesterona/i,'flask'],
+ [/T4|TSH|tireoide|pescoço|hipertireo|hipotireo/i,'thyroid'],
+ [/ultrassom|raio-x|eletrocardiograma/i,'scan'],
+ [/urina|xixi|infecção urinária/i,'pee'],
+ [/água|bebendo/i,'water'],
+ [/hemograma|glicemia|sangue/i,'blood'],[/bioquímica|função renal|colesterol/i,'tube'],
+ [/cirurgia|castração|castrar/i,'scalpel'],
+ [/remédio|medicamento|metimazol|trilostano|levotiroxina|comprimido|prednisolona|corticoide|anticoncepcional|antibiótico|hormônio|tratamento contínuo|pressão/i,'pill'],
+ [/apetite|comida|dieta|refeiç|alimenta/i,'food'],
+ [/peso|emagre|engord|obesidade/i,'scale'],
+ [/vômit|vomit|diarreia|gastroenter/i,'vomit'],
+ [/pele|pelo/i,'fur'],[/coração|auscultar/i,'heart'],[/avaliação geral|febre/i,'thermo'],
+ [/olho|catarata/i,'eye'],[/abdômen|palpar/i,'hand'],[/hálito|cheirar/i,'nose'],
+ [/quando|antes|cio|último/i,'cal'],[/andar|marcha|neurológico|disposição|cansad|lugares quentes/i,'paw'],
+ [/retorno|reavaliar|sinais de alerta|medir|monitor/i,'cal'],
+ [/tóxico|adoçante|xilitol/i,'candy'],[/vulva|piometra|útero/i,'bug'],
+ [/diabetes|cetoacidose|insulinoma/i,'pancreas'],[/cushing|addison/i,'adrenal'],
+ [/renal|rim/i,'kidney'],[/fígado/i,'liver'],[/epilepsia|convuls/i,'brain'],[/alergia/i,'flower'],[/comportamento/i,'brain'],
+ [/castrad/i,'cal']
+];
+const FALLBACK={anam:'talk',fis:'steth',exm:'micro',dx:'magnify',tx:'cross'};
+const SUITC={anam:['#cfe2ff','#3d8bff'],fis:['#c7f2df','#1fb07a'],exm:['#e6d7ff','#9b5cff'],dx:['#ffe3bf','#ff9a1f'],tx:['#ffd3db','#ff4d6d']};
+function rays(c1,c2){let s='';for(let i=0;i<12;i++){const a=i*30*Math.PI/180,b=(i*30+15)*Math.PI/180;
+  s+=`<path d="M50 32L${(50+90*Math.cos(a)).toFixed(1)} ${(32+90*Math.sin(a)).toFixed(1)}L${(50+90*Math.cos(b)).toFixed(1)} ${(32+90*Math.sin(b)).toFixed(1)}z" fill="${c2}" opacity=".18"/>`}
+  return `<rect width="100" height="64" fill="${c1}"/>${s}<circle cx="50" cy="32" r="22" fill="#fff" opacity=".55"/>`}
+function cardArt(k,c){
+  const key=(ART_RULES.find(([re])=>re.test(c.t))||[])[1]||FALLBACK[k];
+  const [c1,c2]=SUITC[k];
+  return `<svg viewBox="0 0 100 64" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${rays(c1,c2)}<g>${EMB[key]}</g></svg>`;
+}
+const EFFECT={
+ anam:()=>'Pergunte ao tutor e descubra uma pista sobre o caso.',
+ fis:()=>'Examine o paciente e revele um achado clínico.',
+ exm:c=>`O laboratório envia o laudo. Paga ${money(c.c)} do orçamento do tutor.`,
+ dx:()=>'Declare sua hipótese diagnóstica. Não gasta turno e pode ser trocada.',
+ tx:()=>'Aplique no paciente. A ordem das condutas muda o desfecho!'
+};
+const FLAVOR={anam:'"Me conte tudo, sem pressa."',fis:'Olhos, mãos e estetoscópio.',exm:'Os números não mentem.',dx:'Junte as pistas.',tx:'Decida com cuidado.'};
+const TYPE={anam:'Pergunta',fis:'Exame físico',exm:'Laboratório',dx:'Diagnóstico',tx:'Conduta'};
+function tcgHTML(k,c,extraCls,style){
+  return `<span class="tcg face s-${k} ${extraCls||''}" ${style?`style="${style}"`:''}>
+   <span class="top"><span class="gem${k==='dx'?' zero':''}">${k==='dx'?0:1}</span><span class="type">${TYPE[k]}</span>${c.c?`<span class="coin">${money(c.c)}</span>`:''}</span>
+   <span class="art">${cardArt(k,c)}${c.need?'<span class="reqtag">requer antes</span>':''}</span>
+   <span class="name"><span>${esc(c.t)}</span></span>
+   <span class="txt">${c.need&&st.c?`<span class="req">Requer antes: ${c.need.map(n=>esc((cardOf(n)[1]||{t:n}).t)).join(' + ')}</span>`:''}${EFFECT[k](c)}<span class="flavor">${FLAVOR[k]}</span></span></span>`;
+}
+const SVG_HEART='<svg class="ico" viewBox="0 0 32 32"><path d="M16 28C5 21 2 15 4 10c2-5 9-6 12 0 3-6 10-5 12 0 2 5-1 11-12 18z" fill="#ff4d6d" stroke="#0d1226" stroke-width="2.4"/><path d="M9 11c1-2 3-3 5-2" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+const SVG_HOUR='<svg class="ico" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#5bc0ff" stroke="#0d1226" stroke-width="2.4"/><path d="M11 8h10M11 24h10M12 8c0 5 8 5 8 8s-8 3-8 8M20 8c0 5-8 5-8 8s8 3 8 8" stroke="#0d1226" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M13 22c1-2 5-2 6 0z" fill="#ffd84d"/></svg>';
+const SVG_COIN='<svg class="ico" viewBox="0 0 32 32"><circle cx="16" cy="17" r="13" fill="#d48b0b" stroke="#0d1226" stroke-width="2.4"/><circle cx="16" cy="15" r="13" fill="#ffc83d" stroke="#0d1226" stroke-width="2.4"/><text x="16" y="20" text-anchor="middle" font-family="Lilita One,sans-serif" font-size="13" fill="#0d1226">R$</text></svg>';
+const STAR=(on)=>`<svg viewBox="0 0 40 40"><path d="M20 3l5 11 12 1-9 8 3 12-11-6-11 6 3-12-9-8 12-1z" fill="${on?'#ffc83d':'#3a4170'}" stroke="#1b2340" stroke-width="2.6" stroke-linejoin="round"/>${on?'<path d="M14 14l4-1" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>':''}</svg>`;
+
+/* ---------- sons (sintetizados, sem arquivos) ---------- */
+const SND={on:true,ctx:null};
+try{SND.on=localStorage.getItem('pevSom')!=='0'}catch(e){}
+function actx(){
+  if(!SND.ctx){const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;SND.ctx=new A()}
+  if(SND.ctx.state==='suspended')SND.ctx.resume();return SND.ctx;
+}
+function tone(f,t0,d,type,vol,f2){
+  const c=actx();if(!c)return;const t=c.currentTime+t0,o=c.createOscillator(),g=c.createGain();
+  o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol||.12,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g).connect(c.destination);o.start(t);o.stop(t+d+.05);
+}
+function noise(t0,d,vol){
+  const c=actx();if(!c)return;const b=c.createBuffer(1,Math.max(1,Math.floor(c.sampleRate*d)),c.sampleRate),x=b.getChannelData(0);
+  for(let i=0;i<x.length;i++)x[i]=(Math.random()*2-1)*(1-i/x.length);
+  const s=c.createBufferSource();s.buffer=b;const fl=c.createBiquadFilter();fl.type='highpass';fl.frequency.value=1600;
+  const g=c.createGain();g.gain.value=vol||.1;s.connect(fl).connect(g).connect(c.destination);s.start(c.currentTime+t0);
+}
+const SFX={
+ card:()=>noise(0,.2,.12),
+ deal:()=>{for(let i=0;i<3;i++)noise(i*.08,.07,.05)},
+ good:()=>{tone(660,0,.12,'triangle',.12);tone(990,.09,.18,'triangle',.12)},
+ meh:()=>tone(440,0,.2,'triangle',.08),
+ bad:()=>tone(240,0,.28,'sawtooth',.06,130),
+ coin:()=>{tone(1320,0,.08,'square',.04);tone(1760,.07,.14,'square',.04)},
+ beep:()=>tone(990,0,.11,'sine',.06),
+ win:()=>[523,659,784,1047].forEach((f,i)=>tone(f,i*.12,.3,'triangle',.12)),
+ ok:()=>[523,659,784].forEach((f,i)=>tone(f,i*.12,.25,'triangle',.1)),
+ sad:()=>[392,330,262].forEach((f,i)=>tone(f,i*.25,.4,'triangle',.1)),
+ lose:()=>tone(880,0,1.8,'sine',.07),
+ level:()=>[784,988,1175,1568].forEach((f,i)=>tone(f,i*.09,.24,'square',.05)),
+ click:()=>tone(620,0,.05,'square',.035)
+};
+function sfx(n){if(!SND.on)return;try{SFX[n]&&SFX[n]()}catch(e){}}
+function soundIcon(){return SND.on
+ ?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg>'
+ :'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 9l5 6M21 9l-5 6"/></svg>'}
+function toggleSound(){SND.on=!SND.on;try{localStorage.setItem('pevSom',SND.on?'1':'0')}catch(e){}if(SND.on){sfx('click');actx()}syncMusic();['#soundBtn','#globalSnd'].forEach(s=>{const b=$(s);if(b){b.innerHTML=soundIcon();b.setAttribute('aria-pressed',SND.on)}})}
+let alarmT=null;
+function alarm(on){
+  if(on&&!alarmT)alarmT=setInterval(()=>{if(st.screen!=='case'||!st.c||st.c.result||st.c.stabilized){alarm(false);return}sfx('beep')},1200);
+  if(!on&&alarmT){clearInterval(alarmT);alarmT=null}
+}
+
+/* ---------- progressão: níveis e conquistas ---------- */
+const LEVELS=[[0,'Estagiário(a)'],[200,'Residente'],[500,'Plantonista'],[900,'Especialista'],[1400,'Chefe do plantão']];
+const BADGES=[
+ ['primeiro','Primeiro plantão','Terminou o primeiro atendimento.'],
+ ['triagem','Mestre da triagem','Acertou 3 triagens.'],
+ ['salvou','Salvou na emergência','Estabilizou um paciente grave que teve alta.'],
+ ['economico','Econômico','Paciente com alta gastando até 60% do orçamento.'],
+ ['semdica','Sem dicas','3 estrelas sem pedir dica.'],
+ ['certeiro','Diagnóstico certeiro','Acertou o diagnóstico completo.'],
+ ['nota','Nota máxima','Fez 90 pontos ou mais.'],
+ ['completo','Todos os pacientes','Atendeu os 8 pacientes.'],
+ ['turno','Turno fechado','Concluiu um plantão de 3 pacientes.']
+];
+const PROG={xp:0,badges:[],triOk:0,done:[]};
+try{Object.assign(PROG,JSON.parse(localStorage.getItem('pevProg')||'{}'))}catch(e){}
+function saveProg(){try{localStorage.setItem('pevProg',JSON.stringify(PROG))}catch(e){}}
+function levelOf(xp){
+  let i=0;LEVELS.forEach((l,j)=>{if(xp>=l[0])i=j});
+  const nx=LEVELS[i+1];return {i,name:LEVELS[i][1],next:nx?nx[0]:null,pct:nx?Math.round((xp-LEVELS[i][0])/(nx[0]-LEVELS[i][0])*100):100};
+}
+function award(){
+  const C=st.c,r=C.result,before=levelOf(PROG.xp);
+  let gain=r.total+r.stars*10;if(st.mode==='desafio')gain=Math.round(gain*1.5);
+  PROG.xp+=gain;if(C.triage==='ok')PROG.triOk++;if(!PROG.done.includes(C.cs.id))PROG.done.push(C.cs.id);
+  const got=[],add=id=>{if(!PROG.badges.includes(id)){PROG.badges.push(id);got.push(id)}};
+  add('primeiro');if(PROG.triOk>=3)add('triagem');
+  if(C.tri.inst&&C.stabilized&&r.g==='bom')add('salvou');
+  if(r.g==='bom'&&C.spent<=C.budget*.6)add('economico');
+  if(r.stars===3&&!C.hintsAsked)add('semdica');
+  if(r.dxc&&r.dxc.pts>=20)add('certeiro');
+  if(r.total>=90)add('nota');
+  if(PROG.done.length>=CASES.length)add('completo');
+  saveProg();const after=levelOf(PROG.xp);
+  C.award={gain,got,after,up:after.i>before.i};
+}
+function medal(on){return `<svg viewBox="0 0 40 46" aria-hidden="true"><path d="M12 2h7l-3 14h-7zM28 2h-7l3 14h7z" fill="${on?'#ff4d6d':'#5b6283'}" stroke="#1b2340" stroke-width="2" stroke-linejoin="round"/><circle cx="20" cy="29" r="13" fill="${on?'#ffc83d':'#3a4170'}" stroke="#1b2340" stroke-width="2.4"/><path d="M20 21l2.4 5 5.4.6-4 3.7 1.1 5.3-4.9-2.8-4.9 2.8 1.1-5.3-4-3.7 5.4-.6z" fill="${on?'#fff3c4':'#5b6283'}" stroke="#1b2340" stroke-width="1.4" stroke-linejoin="round"/></svg>`}
+function badgeHTML(id,on,isNew){const b=BADGES.find(x=>x[0]===id);return `<div class="medal${on?' on':''}${isNew?' new':''}" title="${esc(b[2])}">${medal(on)}<b>${esc(b[1])}</b>${isNew?`<small>${esc(b[2])}</small>`:''}</div>`}
+
+/* ---------- vozes dos animais e música do menu ---------- */
+function voice(type,fA,fB,dur,vol,band,t0){
+  const c=actx();if(!c)return null;const T=c.currentTime+(t0||0);
+  const o=c.createOscillator(),g=c.createGain(),f=c.createBiquadFilter();
+  o.type=type;o.frequency.setValueAtTime(fA,T);o.frequency.exponentialRampToValueAtTime(fB,T+dur*.8);
+  f.type='bandpass';f.frequency.value=band;f.Q.value=2.2;
+  g.gain.setValueAtTime(.0001,T);g.gain.exponentialRampToValueAtTime(vol,T+.012);g.gain.exponentialRampToValueAtTime(.0001,T+dur);
+  o.connect(f).connect(g).connect(c.destination);o.start(T);o.stop(T+dur+.05);return {o,T};
+}
+function bark(p,n){p=p||1;for(let i=0;i<(n||2);i++){const t=i*.2;voice('sawtooth',430*p,210*p,.14,.28,950*p,t);voice('square',860*p,420*p,.08,.05,1800*p,t);noise(t,.04,.05)}}
+function whine(p){p=p||1;voice('sine',1100*p,700*p,.5,.08,1200*p,0)}
+function meow(p,sad){
+  p=p||1;const c=actx();if(!c)return;const T=c.currentTime,d=sad?.8:.62;
+  const o=c.createOscillator(),g=c.createGain(),f=c.createBiquadFilter(),l=c.createOscillator(),lg=c.createGain();
+  o.type='sawtooth';o.frequency.setValueAtTime(520*p,T);o.frequency.linearRampToValueAtTime((sad?620:840)*p,T+.18);o.frequency.linearRampToValueAtTime((sad?420:560)*p,T+d);
+  f.type='bandpass';f.Q.value=3;f.frequency.setValueAtTime(900,T);f.frequency.linearRampToValueAtTime(1700,T+.2);f.frequency.linearRampToValueAtTime(800,T+d);
+  l.frequency.value=7;lg.gain.value=10;l.connect(lg).connect(o.frequency);
+  g.gain.setValueAtTime(.0001,T);g.gain.exponentialRampToValueAtTime(.2,T+.05);g.gain.setValueAtTime(.2,T+d-.2);g.gain.exponentialRampToValueAtTime(.0001,T+d);
+  o.connect(f).connect(g).connect(c.destination);o.start(T);o.stop(T+d+.05);l.start(T);l.stop(T+d+.05);
+}
+function petSound(cs,mood){
+  if(!SND.on||!cs)return;const small=(cs.scale||1)<.7,p=small?1.45:cs.scale<.9?1.15:1;
+  try{if(cs.esp==='gato'){meow(p,mood==='sad')}else{mood==='sad'?whine(p):bark(p,mood==='happy'?3:2)}}catch(e){}
+}
+const MUS={timer:null,step:0,next:0};
+const MEL=[72,0,76,0,79,0,76,0, 77,0,81,0,79,0,0,0, 72,0,76,0,79,0,84,0, 83,0,79,0,81,0,0,0, 76,0,79,0,81,0,79,0, 77,0,76,0,74,0,72,0, 74,0,76,0,77,0,79,0, 76,0,74,0,72,0,0,0];
+const BAS=[48,0,0,0,55,0,0,0, 53,0,0,0,55,0,0,0, 48,0,0,0,55,0,0,0, 57,0,0,0,55,0,0,0, 53,0,0,0,48,0,0,0, 50,0,0,0,55,0,0,0, 50,0,0,0,55,0,0,0, 48,0,0,0,48,0,0,0];
+const midi=n=>440*Math.pow(2,(n-69)/12);
+function musicOn(){
+  if(!SND.on||MUS.timer||!SND.ctx)return;const c=actx();if(!c)return;MUS.next=c.currentTime+.1;
+  MUS.timer=setInterval(()=>{const c=SND.ctx;if(!c)return;while(MUS.next<c.currentTime+.35){const i=MUS.step%64,t=Math.max(0,MUS.next-c.currentTime);
+    if(MEL[i])tone(midi(MEL[i]),t,.22,'triangle',.04);if(BAS[i])tone(midi(BAS[i]),t,.5,'sine',.06);if(i%4===2)noise(t,.03,.015);
+    MUS.next+=.24;MUS.step++}},50);
+}
+function musicOff(){if(MUS.timer){clearInterval(MUS.timer);MUS.timer=null}}
+const MENU_SCREENS=['start','avatar','rules','clinic','board','pick','item','runend'];
+function syncMusic(){if(SND.on&&SND.ctx&&MENU_SCREENS.includes(st.screen))musicOn();else musicOff()}
+document.addEventListener('pointerdown',()=>{if(SND.on){actx();syncMusic()}},true);
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&!b.closest('.pcard')&&b.dataset.act!=='sound')sfx('click')},true);
+
+/* ---------- sinais vitais (mudam com a evolução do paciente) ---------- */
+const VITALS={
+ tom:[{l:'Batimentos',u:' bpm',s:210,h:170,n:[140,200]},{l:'Gengiva',c:['Pálida','Rosa-pálida','Rosada'],bad:[0]},{l:'Desidratação',u:'%',s:8,h:0,n:[0,5]},{l:'Estado',c:['Prostrado, fraco','Mais alerta','Alerta, pedindo comida'],bad:[0],w:'Quase em coma'}],
+ rex:[{l:'Glicose',u:' mg/dL',s:38,h:95,n:[70,120]},{l:'Batimentos',u:' bpm',s:90,h:85,n:[60,140]},{l:'Gengiva',c:['Rosada','Rosada','Rosada']},{l:'Estado',c:['Desorientado, convulsionou','Mais alerta','Alerta e calmo'],bad:[0],w:'Convulsionando'}],
+ luna:[{l:'Batimentos',u:' bpm',s:60,h:100,n:[70,140]},{l:'Gengiva',c:['Pálida, demora a corar','Rosa-pálida','Rosada'],bad:[0]},{l:'Desidratação',u:'%',s:10,h:0,n:[0,5]},{l:'Estado',c:['Quase desmaiando','Fraca, mas consciente','Alerta, abanando o rabo'],bad:[0],w:'Desmaiada'}],
+ mimi:[{l:'Batimentos',u:' bpm',s:240,h:195,n:[140,220]},{l:'Pressão',u:' mmHg',s:185,h:150,n:[100,160]},{l:'Hidratação',c:['Hidratada','Hidratada','Hidratada']},{l:'Estado',c:['Agitada','Mais calma','Calma'],bad:[0]}],
+ thor:[{l:'Batimentos',u:' bpm',s:110,h:95,n:[60,140]},{l:'Gengiva',c:['Pálida','Rosa-pálida','Rosada'],bad:[0]},{l:'Desidratação',u:'%',s:4,h:0,n:[0,3]},{l:'Estado',c:['Abatido','Mais disposto','Disposto'],w:'Prostrado'}],
+ bob:[{l:'Temperatura',u:' °C',s:36.5,h:38.5,n:[37.5,39.2],dec:1},{l:'Glicose',u:' mg/dL',s:35,h:100,n:[70,120]},{l:'Gengiva',c:['Rosa-pálida','Rosa','Rosada']},{l:'Estado',c:['Tremendo e mole','Menos trêmulo','Esperto, querendo comer'],bad:[0],w:'Convulsionando'}],
+ kiko:[{l:'Batimentos',u:' bpm',s:150,h:100,n:[60,140]},{l:'Gengiva',c:['Seca e pegajosa','Úmida','Úmida e rosada'],bad:[0]},{l:'Desidratação',u:'%',s:7,h:0,n:[0,5]},{l:'Estado',c:['Com dor, em posição de prece','Mais confortável','Confortável, deitado'],bad:[0],w:'Muita dor, prostrado'}],
+ duque:[{l:'Batimentos',u:' bpm',s:90,h:90,n:[60,140]},{l:'Fezes',c:['Volumosas e gordurosas','Melhorando','Normais'],bad:[0]},{l:'Hidratação',c:['Hidratado','Hidratado','Hidratado']},{l:'Estado',c:['Alerta, muito magro','Alerta','Alerta, ganhando peso']}]
+};
+function healthOf(C){
+  if(C.result)return {bom:1,ressalva:.6,ruim:-.5,obito:-1}[C.result.g];
+  const cs=C.cs,ok=cs.tx.filter(z=>z.ok),okN=ok.filter(z=>C.played.includes(z.id)).length,bad=cs.tx.filter(z=>!z.ok&&C.played.includes(z.id)).length;
+  let h=okN/ok.length-.3*bad;
+  if(cs.decay>0){if(C.stabilized)h+=.15;else h-=(cs.stab-C.stab)/cs.stab*1.2}
+  return Math.max(-1,Math.min(1,h));
+}
+function vitalsAt(cs,h,dead){
+  return VITALS[cs.id].map(v=>{
+    if(dead)return [v.l,v.l==='Estado'?'Óbito':'—','bad'];
+    if(v.c){const i=h>=.8?2:h>=.34?1:0;
+      if(h<=-.35&&v.w)return [v.l,v.w,'bad'];
+      const b=v.bad||[];return [v.l,v.c[i],b.includes(i)?'bad':(b.length&&i===1?'mid':'ok')]}
+    const x=h>=0?v.s+(v.h-v.s)*h:v.s-(v.h-v.s)*(-h)*.5;
+    const ok=x>=v.n[0]&&x<=v.n[1],near=Math.abs(x-v.h)<=Math.abs(v.s-v.h)*.5;
+    return [v.l,(v.dec?x.toFixed(1).replace('.',','):Math.max(0,Math.round(x)))+v.u,ok?'ok':near?'mid':'bad'];
+  });
+}
+function updVitals(){
+  const C=st.c,el=$('#vitals');if(!el)return;
+  const h=healthOf(C),dead=C.result&&C.result.g==='obito',vs=vitalsAt(C.cs,h,dead);
+  const dir=C.hPrev===undefined?0:h>C.hPrev+.01?1:h<C.hPrev-.01?-1:0;
+  const prev=C.vPrev||[];
+  el.innerHTML=`<span class="vlbl">Sinais vitais</span>`+vs.map(([l,t,f],i)=>{const ch=prev[i]!==undefined&&prev[i]!==t;
+    const sl=innerWidth<900?({Batimentos:'FC',Desidratação:'Desidrat.',Temperatura:'Temp.',Pressão:'Pressão',Hidratação:'Hidrat.'}[l]||l):l;
+    return `<div class="vit ${f}${ch?(dir>=0?' up':' down'):''}"><span>${esc(sl)}${ch?(dir>=0?' ▲':' ▼'):''}</span><b>${esc(t)}</b></div>`}).join('');
+  C.vPrev=vs.map(v=>v[1]);C.hPrev=h;
+  const fc=vs.find(v=>v[0]==='Batimentos'),hr=$('#monHR');if(hr)hr.textContent=fc?'FC '+fc[1].replace(' bpm',''):'EST '+Math.round(C.stab);
+}
+
+/* ---------- plantão de 3 pacientes e itens de plantão ---------- */
+const RUN_SIZE=3;
+const ITEMS=[
+ {id:'glico',nome:'Glicosímetro portátil',ef:'A glicemia sai de graça.',art:'blood'},
+ {id:'lab',nome:'Parceria com laboratório',ef:'Todos os exames ficam 20% mais baratos.',art:'micro'},
+ {id:'plano',nome:'Tutor com plano de saúde',ef:'+R$ 100 de orçamento em cada paciente.',art:'scale'},
+ {id:'soro',nome:'Kit de emergência pronto',ef:'Na emergência, o paciente perde metade da vida por carta.',art:'iv'},
+ {id:'acesso',nome:'Acesso venoso rápido',ef:'Cada paciente chega com +10 de vida.',art:'syringe'},
+ {id:'manual',nome:'Manual de bolso',ef:'O professor dá a primeira dica de graça em cada caso.',art:'cal'}
+];
+const hasItem=id=>!!(st.run&&st.run.items.includes(id));
+function applyItems(cs){
+  if(!st.run||!st.run.items.length)return cs;
+  const exm=cs.exm.map(c=>{let v=c.c;if(hasItem('lab'))v=Math.round(v*.8/5)*5;if(hasItem('glico')&&c.id==='x_glic')v=0;return v===c.c?c:Object.assign({},c,{c:v})});
+  return Object.assign({},cs,{exm,decay:hasItem('soro')?Math.ceil(cs.decay/2):cs.decay,stab:hasItem('acesso')?Math.min(100,cs.stab+10):cs.stab});
+}
+function itemCard(it,act){
+  return `<button class="itemcard" ${act?`data-act="item" data-v="${it.id}"`:'disabled'}><span class="tcg s-item">
+   <span class="top"><span class="gem">★</span><span class="type">Item</span></span>
+   <span class="art"><svg viewBox="0 0 100 64" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${rays('#fff1c2','#ffc83d')}<g>${EMB[it.art]}</g></svg></span>
+   <span class="name"><span>${esc(it.nome)}</span></span><span class="txt">${esc(it.ef)}</span></span></button>`;
+}
+function itemChips(){return st.run&&st.run.items.length?`<div class="itemchips">${st.run.items.map(id=>{const it=ITEMS.find(i=>i.id===id);return `<span class="ichip" title="${esc(it.ef)}">★ ${esc(it.nome)}</span>`}).join('')}</div>`:''}
+function runBar(){
+  if(!st.run)return '';const r=st.run;
+  return `<div class="runbar"><span class="eyebrow">Plantão</span><div class="runsteps">${Array.from({length:RUN_SIZE},(_,i)=>{const s=r.scores[i];
+    return `<span class="rstep${s?' done g-'+s.g:i===r.scores.length?' cur':''}">${s?esc(s.nome):'Paciente '+(i+1)}</span>`}).join('')}</div>
+    <b class="runpts">${r.scores.reduce((a,s)=>a+s.total,0)} pts</b></div>`;
+}
+function startRun(){st.run={items:[],scores:[],ids:[],offer:null};st.screen='pick';render();window.scrollTo(0,0)}
+function pickOptions(){
+  const r=st.run;if(r.offer)return r.offer;
+  let pool=CASES.filter(c=>!r.ids.includes(c.id)&&!st.seen.includes(c.id));
+  if(pool.length<2)pool=CASES.filter(c=>!r.ids.includes(c.id));
+  r.offer=shuffle(pool).slice(0,2).map(c=>c.id);return r.offer;
+}
+function vPick(){
+  const r=st.run,ids=pickOptions(),n=r.scores.length+1;
+  return `<section class="cover">${runBar()}
+   <p class="eyebrow">Paciente ${n} de ${RUN_SIZE}</p><h2>Quem você atende agora?</h2>
+   <p class="intro" style="text-align:left">Dois pacientes chegaram ao mesmo tempo. Leia a queixa e escolha.</p>
+   <div class="picks">${ids.map(id=>{const c=CASES.find(x=>x.id===id);return `<button class="pickcard" data-act="pick" data-v="${c.id}">
+     <svg viewBox="-60 -110 120 120" aria-hidden="true"><rect x="-60" y="-110" width="120" height="120" fill="#d8eee7"/><rect x="-60" y="-14" width="120" height="24" fill="#ece5d6"/><g transform="translate(0 -6) scale(${c.esp==='gato'?.95:.8})">${petSVG(c)}</g></svg>
+     <b>${esc(c.nome)}</b><small>${esc(c.resumo)}</small><span class="said">“${esc(c.fala)}”</span></button>`}).join('')}</div>
+   ${itemChips()}
+   <button class="btn ghost" data-act="endrun">Encerrar plantão</button></section>`;
+}
+function vItem(){
+  const r=st.run;if(!r.itemOffer)r.itemOffer=shuffle(ITEMS.filter(i=>!r.items.includes(i.id))).slice(0,3).map(i=>i.id);
+  return `<section class="cover">${runBar()}
+   <p class="eyebrow">Recompensa</p><h2>Escolha 1 item para o resto do plantão</h2>
+   <div class="items">${r.itemOffer.map(id=>itemCard(ITEMS.find(i=>i.id===id),true)).join('')}</div>${itemChips()}</section>`;
+}
+function vRunEnd(){
+  const r=st.run,pts=r.scores.reduce((a,s)=>a+s.total,0),stars=r.scores.reduce((a,s)=>a+s.stars,0),saved=r.scores.filter(s=>s.g==='bom'||s.g==='ressalva').length;
+  if(!r.awarded){r.awarded=true;r.bonus=50+stars*10;PROG.xp+=r.bonus;r.newBadge=!PROG.badges.includes('turno');if(r.newBadge)PROG.badges.push('turno');saveProg();setTimeout(()=>sfx('level'),500)}
+  return `<section class="cover"><article class="report">
+   <div class="hd"><span>Fim do plantão</span><span>${RUN_SIZE} pacientes</span></div>
+   <div class="stars">${[1,2,3].map(i=>STAR(i<=Math.round(stars/RUN_SIZE))).join('')}</div>
+   <div class="score"><b id="scoreNum" data-to="${pts}">0</b><span class="muted">/ ${RUN_SIZE*100} pontos · ${stars} de ${RUN_SIZE*3} estrelas · ${saved} de ${RUN_SIZE} pacientes com alta</span></div>
+   <div class="sect">${r.scores.map(s=>`<div class="runrow"><b>${esc(s.nome)}</b><span class="muted">${esc(s.caso)}</span><span class="chip g-${s.g}">${G[s.g]}</span><span class="pts">${s.total}</span></div>`).join('')}</div>
+   <div class="xpbox up"><div class="xprow"><span class="lvlnum">${levelOf(PROG.xp).i+1}</span><div style="min-width:0;flex:1"><b>${esc(levelOf(PROG.xp).name)}</b><div class="xpbar"><i style="width:${levelOf(PROG.xp).pct}%"></i></div></div><span class="gain">+${r.bonus} XP</span></div>
+    <p class="muted" style="font-size:.85rem">Bônus de plantão: 50 XP + 10 por estrela.</p>
+    ${r.newBadge?`<p class="eyebrow">Nova conquista!</p><div class="medals">${badgeHTML('turno',true,true)}</div>`:''}</div>
+   ${r.items.length?`<div class="sect"><p class="eyebrow">Itens usados</p>${itemChips()}</div>`:''}</article>
+   <div class="row"><button class="btn" data-act="newrun">Novo plantão</button><button class="btn ghost" data-act="endrun">Voltar à sala de espera</button></div></section>`;
+}
+
+/* ---------- ajustes de dificuldade e aparência ---------- */
+const EXTRA={
+ tom:{fur:'#e2893b',dark:'#b4622a',striped:1,scale:.95,budget:280,maxT:15,tutor:{style:'short',hair:'#2b2b2b',shirt:'#c25b4a',pants:'#3a4258',skin:'#c98f68'}},
+ luna:{fur:'#3a3330',dark:'#1d1917',scale:.95,budget:360,maxT:13,tutor:{style:'cap',hair:'#2f4f8a',shirt:'#e0a33a',pants:'#3a4258',skin:'#8d5a3c'}},
+ mimi:{fur:'#9aa1a6',dark:'#6a7176',striped:1,scale:.9,budget:270,maxT:14,tutor:{style:'bun',hair:'#d9d9d9',shirt:'#4f8a7c',pants:'#4b4b5a',skin:'#e8b98f'}},
+ thor:{fur:'#d9c9a8',dark:'#9c8a6a',scale:1,budget:520,maxT:15,tutor:{style:'short',hair:'#5a3b25',shirt:'#3e7cb8',pants:'#2d2d33',skin:'#e2ad84'}},
+ bob:{fur:'#8a7560',dark:'#3d3128',scale:.62,budget:160,maxT:13,tutor:{style:'long',hair:'#1f1b1a',shirt:'#d0607a',pants:'#384055',skin:'#a8714d'}},
+ kiko:{fur:'#8f9497',dark:'#5c6265',scale:.85,budget:300,maxT:14,tutor:{style:'cap',hair:'#9b2f2f',shirt:'#5c9b52',pants:'#3a4258',skin:'#f0c6a0'}},
+ duque:{fur:'#c98a4a',dark:'#2a2320',scale:1.08,budget:340,maxT:15,tutor:{style:'long',hair:'#b8862f',shirt:'#7d5ba6',pants:'#2f3a52',skin:'#f0c6a0'}},
+ rex:{fur:'#b07a45',dark:'#5a3a22',scale:1,budget:280,maxT:13,tutor:{style:'short',hair:'#8a8a8a',shirt:'#3f5f7a',pants:'#2f2f36',skin:'#d39b74'}}
+};
+CASES.forEach(c=>Object.assign(c,EXTRA[c.id]));
+
+/* ---------- triagem e emergência ---------- */
+const TRIAGE={
+ tom:{inst:1,v:[['Batimentos','200 bpm','alto'],['Gengiva','Pálida','alto'],['Hidratação','Muito desidratado','alto'],['Estado','Prostrado, fraco','alto']],emg:['t_flu','t_kcl','t_ins','t_cort']},
+ luna:{inst:1,v:[['Batimentos','60 bpm (lento em choque)','alto'],['Gengiva','Pálida, demora a corar','alto'],['Hidratação','Muito desidratada','alto'],['Estado','Quase desmaiando','alto']],emg:['t_flu','t_glic','t_kcl','t_alta']},
+ mimi:{inst:0,v:[['Batimentos','240 bpm (acelerado)','alto'],['Gengiva','Rosada'],['Hidratação','Hidratada'],['Estado','Alerta e agitada']]},
+ thor:{inst:0,v:[['Batimentos','110 bpm'],['Gengiva','Pálida','alto'],['Hidratação','Levemente desidratado','alto'],['Estado','Alerta, abatido']]},
+ bob:{inst:1,v:[['Temperatura','36,5 °C (baixa)','alto'],['Gengiva','Rosa-pálida'],['Glicose no glicosímetro','35 mg/dL','alto'],['Estado','Tremendo e mole','alto']],emg:['t_glic','t_aquec','t_jejum']},
+ kiko:{inst:1,v:[['Batimentos','150 bpm (acelerado)','alto'],['Gengiva','Seca e pegajosa','alto'],['Hidratação','Desidratado','alto'],['Estado','Com dor, em posição de prece','alto']],emg:['t_flu','t_anal','t_jej']},
+ duque:{inst:0,v:[['Batimentos','90 bpm'],['Gengiva','Rosada'],['Hidratação','Hidratado'],['Estado','Alerta, muito magro','alto']]},
+ rex:{inst:1,v:[['Batimentos','90 bpm'],['Gengiva','Rosada'],['Glicose no glicosímetro','38 mg/dL','alto'],['Estado','Desorientado, convulsionou','alto']],emg:['t_dex','t_conv','t_bolus']}
+};
+ICON.emg='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>';
+
+/* ---------- estado ---------- */
+const PH=[['anam','Anamnese'],['fis','Exame físico'],['exm','Laboratório'],['dx','Diagnóstico'],['tx','Conduta']];
+const KIND={emg:'Emergência',anam:'Pergunta',fis:'Exame físico',exm:'Laboratório',dx:'Diagnóstico',tx:'Conduta'};
+const G={bom:'Melhorou',ressalva:'Melhorou com ressalva',ruim:'Piorou',obito:'Faleceu'};
+const FLUIDS=['t_flu','t_dex','t_kcl','t_glicos'];
+const HAND=5;
+const st={screen:'start',name:'',avatar:null,seen:[],c:null};
+try{const m=JSON.parse(localStorage.getItem('pev')||'{}');st.name=m.name||'';st.avatar=m.avatar||null;st.seen=m.seen||[];st.tutDone=!!m.tutDone;st.mode=m.mode||'facil';}catch(e){st.mode='facil'}
+function remember(){try{localStorage.setItem('pev',JSON.stringify({name:st.name,avatar:st.avatar,seen:st.seen,tutDone:st.tutDone,mode:st.mode}))}catch(e){}}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money=n=>'R$ '+n.toLocaleString('pt-BR');
+const shuffle=arr=>{const r=arr.slice();for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]]}return r};
+const first=n=>n.split(' ')[0];
+
+/* ---------- lógica do caso ---------- */
+function startCase(forceId){
+  let pool=CASES.filter(c=>!st.seen.includes(c.id));
+  if(!pool.length){st.seen=[];pool=CASES.slice();}
+  const base=forceId?CASES.find(c=>c.id===forceId):pool[Math.floor(Math.random()*pool.length)];
+  if(!st.seen.includes(base.id))st.seen.push(base.id);remember();
+  if(st.run){st.run.ids.push(base.id);st.run.offer=null}
+  const cs=applyItems(base);
+  const locked=new Set();
+  ['anam','fis','exm'].forEach(k=>cs[k].forEach(c=>(c.u||[]).forEach(u=>locked.add(u))));
+  const deck={},hand={};
+  ['anam','fis','exm','tx'].forEach(k=>{
+    const pool=cs[k].filter(c=>!locked.has(c.id)),key=c=>k==='tx'?c.ok:c.v==='E';
+    const ess=shuffle(pool.filter(key)).map(c=>c.id),rest=shuffle(pool.filter(c=>!key(c))).map(c=>c.id),take=Math.max(0,HAND-ess.length);
+    hand[k]=shuffle(ess.slice(0,HAND).concat(rest.slice(0,take)));deck[k]=shuffle(ess.slice(HAND).concat(rest.slice(take)));
+  });
+  deck.dx=[];hand.dx=shuffle(cs.dx).map(c=>c.id);
+  const tri=Object.assign({},TRIAGE[cs.id],{v:vitalsAt(cs,0).map(([l,t,f])=>[l,t,f!=='ok'?'alto':''])});deck.emg=[];hand.emg=[];
+  if(tri.emg){deck.tx=deck.tx.filter(i=>!tri.emg.includes(i));hand.tx=hand.tx.filter(i=>!tri.emg.includes(i));refillFrom(deck,hand,'tx');hand.emg=shuffle(tri.emg)}
+  st.c={cs,deck,hand,locked,fresh:new Set(),shown:new Set(),played:[],log:[],stab:cs.stab,turns:0,spent:0,dx:null,tab:'anam',sel:null,
+    maxT:st.mode==='desafio'?cs.maxT:Infinity,budget:(st.mode==='desafio'?cs.budget:Math.round(cs.budget*1.5/10)*10)+(hasItem('plano')?100:0),
+    clues:[],stabilized:!cs.stabilizers.length,dead:false,timeout:false,busy:true,hintIdx:0,hintsAsked:0,meh:0,emergTold:false,tri,triage:null,emgOn:false};
+  st.screen='case';render();window.scrollTo(0,0);
+  setTimeout(()=>petSound(cs),700);
+  setTimeout(()=>say('tutor',innerWidth>=900?cs.fala:'Doutor(a), por favor, ajude '+(cs.esp==='gato'&&!/a$/.test(cs.nome)?'o ':'')+cs.nome+'!','Tutor(a) de '+cs.nome),950);
+  setTimeout(showTriage,2300);
+}
+function refillFrom(deck,hand,k){while(hand[k].length<HAND&&deck[k].length)hand[k].push(deck[k].shift())}
+function showTriage(){
+  const C=st.c;if(st.screen!=='case'||C.triage)return;
+  $('#overlay').innerHTML=`<div class="overlay" role="dialog" aria-modal="true" aria-label="Triagem"><div class="triage">
+   <p class="eyebrow">Triagem · antes de tudo</p><h2>Como ${esc(C.cs.nome)} chegou?</h2>
+   <p>Olhe os sinais vitais e decida o que fazer primeiro.</p>
+   <div class="vitals">${C.tri.v.map(([l,v,a])=>`<div class="${a?'alto':''}"><span>${esc(l)}</span><b>${esc(v)}</b></div>`).join('')}</div>
+   <div class="tchoices">
+    <button class="tbtn ok" data-act="triage" data-v="0"><b>Estável</b>Consulta normal, com calma</button>
+    <button class="tbtn bad" data-act="triage" data-v="1"><b>Instável</b>Estabilizar primeiro</button></div></div></div>`;
+}
+function chooseTriage(v){
+  const C=st.c;if(C.triage)return;
+  const inst=!!C.tri.inst,ok=(v==='1')===inst;C.triage=ok?'ok':'erro';C.busy=false;$('#overlay').innerHTML='';
+  if(inst){C.emgOn=true;C.tab='emg'}
+  updAll();
+  react(ok?'feliz':'triste',{skip:true});
+  if(inst&&ok)setTimeout(()=>prof('Isso! Paciente instável. Use a pilha vermelha de Emergência para estabilizar antes de investigar.'),900);
+  else if(inst){C.stab=Math.max(5,C.stab-10);updAll();setTimeout(()=>prof('Atenção: esses sinais mostram um paciente instável! Abri a pilha vermelha de Emergência. Estabilize primeiro.'),900)}
+  else if(ok)setTimeout(()=>prof('Boa! Paciente estável. Comece pela anamnese: toque numa carta para perguntar ao tutor.'),900);
+  else setTimeout(()=>prof('Calma, este paciente está estável. Pode seguir a consulta normalmente, começando pela anamnese.'),900);
+  if(hasItem('manual')){C.hintIdx=1;setTimeout(()=>prof('Manual de bolso: '+C.cs.hints[0]),3600)}
+  if(!st.tutDone)setTimeout(()=>tutorial(0),ok?2600:3200);
+}
+const TUT=[
+ ['#decks','Estas são suas pilhas de cartas. Toque em qualquer uma, quando quiser: você pode ir e voltar livremente.'],
+ ['#hand','Toque numa carta para ver maior. Depois toque em "Jogar carta". Cada carta gasta 1 turno.'],
+ ['#finishBtn','Quando tiver um diagnóstico e pelo menos uma conduta, toque em Encerrar para ver o resultado.']
+];
+function tutorial(i){
+  const C=st.c;if(st.screen!=='case'||C.result)return;
+  if(i>=TUT.length){st.tutDone=true;remember();$('#overlay').innerHTML='';C.busy=false;return}
+  C.busy=true;
+  const [sel,txt]=TUT[i],el=$(sel);if(!el)return tutorial(i+1);
+  el.scrollIntoView({block:'center'});
+  setTimeout(()=>{
+    const r=el.getBoundingClientRect(),pad=6,below=r.top<innerHeight/2;
+    const extra=i===0&&C.emgOn?' A pilha vermelha é a de Emergência: use-a primeiro quando o paciente estiver instável.':'';
+    $('#overlay').innerHTML=`<div class="coach" role="dialog" aria-modal="true" aria-label="Tutorial">
+     <div class="spot" style="left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px"></div>
+     <div class="tip" style="${below?`top:${Math.min(r.bottom+16,innerHeight-190)}px`:`bottom:${Math.min(innerHeight-r.top+16,innerHeight-190)}px`}">
+      <span class="tnum">${i+1}/${TUT.length}</span><p>${esc(txt+extra)}</p>
+      <button class="btn small" data-act="tut" data-v="${i+1}">${i+1<TUT.length?'Próximo':'Entendi!'}</button></div></div>`;
+  },350);
+}
+function cardOf(id){const cs=st.c.cs;for(const k of ['anam','fis','exm','tx','dx']){const f=cs[k].find(z=>z.id===id);if(f)return[k,f]}return[]}
+function refill(k){const C=st.c;while(C.hand[k].length<HAND&&C.deck[k].length)C.hand[k].push(C.deck[k].shift())}
+function spendTurn(extraLoss){
+  const C=st.c;C.turns++;
+  if(!C.stabilized){
+    if(C.cs.stabilizers.every(s=>C.played.includes(s)))C.stabilized=true;
+    else C.stab=Math.max(0,C.stab-C.cs.decay);
+  }
+  if(extraLoss)C.stab=Math.max(0,C.stab-extraLoss);
+  if(C.stab<=0){C.dead=true;return finish();}
+  if(C.turns>=C.maxT){C.timeout=true;return finish();}
+  return false;
+}
+function tapCard(id){
+  const C=st.c;if(C.busy)return;
+  const [k,card]=cardOf(id);
+  C.sel=id;showZoom(k,card);
+}
+function showZoom(k,card){
+  const C=st.c,broke=k==='exm'&&C.spent+card.c>C.budget;
+  $('#overlay').innerHTML=`<div class="overlay" role="dialog" aria-modal="true" aria-label="Carta"><div class="zoomwrap">
+   <div class="bigtcg">${tcgHTML(k,card)}</div>
+   ${broke?'<p class="warn">O tutor não tem dinheiro para este exame.</p>':''}
+   <div class="row"><button class="btn ghost" data-act="cancel">Voltar</button>
+    <button class="btn" data-act="playsel" ${broke?'disabled':''}>${k==='dx'?'Escolher diagnóstico':'Jogar carta'}</button></div></div></div>`;
+  const pb=$('#overlay [data-act=playsel]');if(pb&&!pb.disabled)pb.focus();
+}
+function playSel(){
+  const C=st.c,id=C.sel;if(!id||C.busy)return;
+  const [k,card]=cardOf(id);
+  if(k==='exm'&&C.spent+card.c>C.budget)return;
+  C.busy=true;C.sel=null;$('#overlay').innerHTML='';sfx('card');
+  const el=document.querySelector(`.pcard[data-id="${id}"]`);
+  if(el){el.classList.remove('sel');el.classList.add('fly')}
+  setTimeout(()=>{C.busy=false;resolve(k,card)},matchMedia('(prefers-reduced-motion: reduce)').matches?0:430);
+}
+function resolve(k,card){
+  const C=st.c,cs=C.cs;
+  if(k==='dx'){C.dx=card.id;say('vet','Minha hipótese: '+card.t+'.','Diagnóstico');react(rate(k,card),card);updAll();return}
+  const mood=rate(k,card);
+  C.played.push(card.id);C.fresh.delete(card.id);
+  C.hand[k]=C.hand[k].filter(i=>i!==card.id);C.hand.emg=C.hand.emg.filter(i=>i!==card.id);
+  (card.u||[]).forEach(u=>{if(C.locked.has(u)){C.locked.delete(u);C.fresh.add(u);const [uk]=cardOf(u);
+    if(C.hand[uk].length<HAND+1)C.hand[uk].push(u);else C.deck[uk].unshift(u)}});
+  refill(k);
+  C.log.unshift({k,card,turn:C.turns+1});
+  if(k==='anam'||k==='fis'||k==='exm')C.clues.unshift({k,q:card.t,a:card.r.replace(/\n/g,' · '),fresh:true});
+  let loss=0;const before=C.stab;
+  if(k==='exm'){C.spent+=card.c;setTimeout(()=>{fx('−'+money(card.c),'#ffd36b',70);sfx('coin')},350)}
+  const wide=innerWidth>=900;
+  if(k==='anam'){if(wide)say('vet',card.t,'Você pergunta');setTimeout(()=>say('tutor',card.r,'Tutor(a)'),wide?500:0)}
+  if(k==='fis'&&wide)say('vet',card.r,'Achado · '+card.t,true);
+  if(k==='tx'){say('vet',card.t+'.','Conduta');if(!card.ok&&cs.decay)loss=10}
+  if(spendTurn(loss))return;
+  updAll();
+  react(mood,card);
+  if(C.stab<before)setTimeout(()=>fx('−'+(before-C.stab)+' vida','#ff8a8a',-70),500);
+  if(k==='exm')setTimeout(()=>{if(!C.result)showSlip(card)},650);
+}
+function rate(k,card){
+  const C=st.c;
+  if(k==='dx')return card.pts>=20?'feliz':card.pts>0?'serio':'triste';
+  if(k==='tx'){if(!card.ok)return'triste';if(card.need&&!card.need.every(n=>C.played.includes(n)))return'triste';return'feliz'}
+  if(card.v==='E'||card.v==='U')return'feliz';
+  if(card.v==='X')return'triste';
+  return'serio';
+}
+const MOOD={feliz:['M193 48q7 6 14 0','#ffd96b','Boa!'],serio:['M193 50h14','#ffe9a8','Hum…'],triste:['M193 52q7 -6 14 0','#ffb4a6','Ops']};
+function react(mood,card){
+  const C=st.c,m=$('#mood');
+  const FX={feliz:['Boa jogada!','#7ef0b9','#ffd36b'],serio:['Hum…','#ffe08a','#ffffff'],triste:['Ops!','#ff8a8a','#ff6b6b']}[mood];
+  fx(FX[0],FX[1]);burst(FX[2],mood==='feliz'?10:6);sfx({feliz:'good',serio:'meh',triste:'bad'}[mood]);
+  if(card&&card.ok!==undefined&&!card.skip)setTimeout(()=>petSound(C.cs,mood==='feliz'?'':'sad'),350);
+  if(mood==='triste'){const sg=$('#stage');sg.classList.remove('hit');void sg.offsetWidth;sg.classList.add('hit')}
+  if(m){const [path,fill,tag]=MOOD[mood];$('#moodMouth').setAttribute('d',path);m.querySelector('circle').setAttribute('fill',fill);$('#moodTag').textContent=tag;
+    m.classList.remove('on');void m.getBoundingClientRect();m.classList.add('on')}
+  if(card.skip)return;
+  C.meh=mood==='feliz'?0:C.meh+1;
+  if(!C.stabilized&&C.cs.emerg&&C.stab<=30&&!C.emergTold){C.emergTold=true;return setTimeout(()=>prof(C.cs.emerg),700)}
+  if(mood==='triste'){const why=card.need&&card.ok?card.n:(card.n||'Essa não ajudou neste caso.');setTimeout(()=>prof(why+' Dica: '+nextHint()),700);C.meh=0}
+  else if(C.meh>=3){C.meh=0;setTimeout(()=>prof('Vamos focar. '+nextHint()),700)}
+}
+function nextHint(){const C=st.c,h=C.cs.hints;const t=h[Math.min(C.hintIdx,h.length-1)];C.hintIdx++;return t}
+function prof(text){
+  if(st.screen!=='case'||st.c.result)return;
+  const t=$('#profText');if(!t)return;t.textContent=text;
+  const bar=$('#profbar');bar.classList.remove('flash');void bar.offsetWidth;bar.classList.add('flash');
+  const fig=document.getElementById('profFig');if(fig){fig.classList.add('talking');setTimeout(()=>fig.classList.remove('talking'),1600)}
+}
+function askHint(){const C=st.c;if(C.busy||C.result)return;C.hintsAsked++;prof(nextHint());updHud()}
+function swapHand(){
+  const C=st.c,k=C.tab;if(C.busy||k==='dx'||!C.deck[k].length)return;
+  C.deck[k].push(...C.hand[k]);C.hand[k].forEach(i=>C.shown.delete(i));C.hand[k]=[];refill(k);C.sel=null;
+  C.log.unshift({k:'swap',card:{t:'Trocou as cartas da mão ('+KIND[k]+')'},turn:C.turns+1});
+  if(spendTurn(0))return;updAll();
+}
+
+/* ---------- falas ---------- */
+const typers={};
+function say(who,text,label,finding){
+  const b=document.getElementById('b-'+who);if(!b)return;
+  clearInterval(typers[who]);
+  b.className='bubble '+who+(finding?' finding':'')+' on';
+  clearTimeout(typers[who+'h']);if(who==='vet'||innerWidth<900)typers[who+'h']=setTimeout(()=>b.classList.remove('on'),who==='vet'?5000:8000);
+  b.innerHTML=`<small>${esc(label||'')}</small><span></span>`;
+  const span=b.querySelector('span'),fig=document.getElementById({tutor:'tutorFig',vet:'vetFig',prof:'profFig'}[who]);
+  if(fig)fig.classList.add('talking');
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){span.textContent=text;fig&&fig.classList.remove('talking');return}
+  let i=0;typers[who]=setInterval(()=>{i+=2;span.textContent=text.slice(0,i);if(i>=text.length){clearInterval(typers[who]);fig&&fig.classList.remove('talking')}},22);
+}
+function showSlip(card){
+  $('#overlay').innerHTML=`<div class="overlay" role="dialog" aria-modal="true" aria-label="Resultado de exame"><div class="slip">
+   <div class="hd"><span>Laboratório Vet · laudo</span><span>${esc(st.c.cs.nome)}</span></div>
+   <p class="eyebrow">O laboratório enviou o resultado</p><h3>${esc(card.t)}</h3>
+   <div class="res">${esc(card.r)}</div>
+   <button class="btn" data-act="close">Anexar ao prontuário</button></div></div>`;
+  $('#overlay [data-act=close]').focus();
+}
+function showLog(){
+  const C=st.c;
+  const log=C.log.map(e=>`<div class="e"><span class="i">${String(e.turn).padStart(2,'0')}</span><div><div class="q">${esc(e.card.t)}</div>
+   ${e.k==='anam'?`<div>“${esc(e.card.r)}”</div>`:e.k==='fis'||e.k==='exm'?`<div class="mono">${esc(e.card.r).replace(/\n/g,' · ')}</div>`:''}</div></div>`).join('');
+  $('#overlay').innerHTML=`<div class="overlay" role="dialog" aria-modal="true" aria-label="Prontuário"><div class="slip">
+   <div class="hd"><span>Prontuário · ${esc(C.cs.nome)}</span><span>${C.turns} turnos</span></div>
+   <div class="log">${log||'<p class="muted">Nada registrado ainda.</p>'}</div>
+   <button class="btn" data-act="close">Fechar</button></div></div>`;
+}
+
+/* ---------- pontuação ---------- */
+function evaluate(){
+  const C=st.c,cs=C.cs,P=new Set(C.played);
+  const s={dead:C.dead,dx:C.dx,p:id=>P.has(id),before:(a,b)=>{const ia=C.played.indexOf(a),ib=C.played.indexOf(b);return ia>=0&&(ib<0||ia<ib)}};
+  let [g,txt]=cs.outcome(s);
+  const txN=cs.tx.filter(c=>P.has(c.id)).length;
+  if(C.timeout&&!C.dead&&!(C.dx&&txN)){g='ruim';txt=`O tempo de consulta acabou. O tutor desistiu de esperar e levou ${cs.nome} para outra clínica sem tratamento.`}
+  const W={E:2,U:1};
+  const frac=list=>{let t=0,h=0;list.forEach(c=>{const w=W[c.v]||0;t+=w;if(P.has(c.id))h+=w});return t?h/t:0};
+  const sAn=Math.round(15*frac(cs.anam)),sFi=Math.round(15*frac(cs.fis));
+  const fr=l=>l.length?l.filter(c=>P.has(c.id)).length/l.length:1;
+  const ess=cs.exm.filter(c=>c.v==='E'),use=cs.exm.filter(c=>c.v==='U'),waste=cs.exm.filter(c=>c.v==='X'&&P.has(c.id));
+  const sEx=Math.max(0,Math.round(16*fr(ess)+4*fr(use))-3*waste.length);
+  const dxc=cs.dx.find(z=>z.id===C.dx),sDx=dxc?dxc.pts:0;
+  const okT=cs.tx.filter(c=>c.ok),badT=cs.tx.filter(c=>!c.ok&&P.has(c.id));
+  const sTx=Math.max(0,Math.min(30,Math.round(18*fr(okT))+{bom:12,ressalva:6,ruim:0,obito:0}[g]-6*badT.length));
+  const fases=[['Anamnese',sAn,15],['Exame físico',sFi,15],['Laboratório',sEx,20],['Diagnóstico',sDx,20],['Conduta',sTx,30]];
+  const pen=st.mode==='desafio'?2*C.hintsAsked:0;
+  const triPen=C.triage==='erro'?5:0;
+  const total=Math.max(0,sAn+sFi+sEx+sDx+sTx-pen-triPen);
+  const stars=g==='obito'?0:Math.min(g==='bom'?3:g==='ressalva'?2:1,total>=80?3:total>=55?2:total>=30?1:0);
+  return {g,txt,fases,total,stars,pen,dxc,waste,badT,okT,P};
+}
+function finish(){
+  const C=st.c;if(C.result)return true;
+  C.result=evaluate();C.busy=true;award();alarm(false);updVitals();
+  if(st.run)st.run.scores.push({id:C.cs.id,nome:C.cs.nome,caso:C.cs.doenca,g:C.result.g,total:C.result.total,stars:C.result.stars});
+  const g=C.result.g,stg=$('#stage');$('#overlay').innerHTML='';
+  const pet=document.getElementById('pet');if(pet&&(g==='obito'||g==='ruim'))pet.classList.add('sick');
+  if(stg){stg.classList.add('end-'+g);
+    const T={bom:['Alta!','#7ef0b9'],ressalva:['Alta com cuidados','#ffd36b'],ruim:['Piorou…','#ff8a8a'],obito:['Óbito','#cfd3e6']}[g];
+    setTimeout(()=>{fx(T[0],T[1]);if(g==='bom'){burst('#ffd36b',12);setTimeout(()=>burst('#7ef0b9',12),350);setTimeout(()=>burst('#ff8fb8',12),700)}},300)}
+  sfx({bom:'win',ressalva:'ok',ruim:'sad',obito:'lose'}[g]);
+  if(g==='bom')setTimeout(()=>petSound(C.cs,'happy'),700);else if(g==='ruim')setTimeout(()=>petSound(C.cs,'sad'),700);
+  setTimeout(()=>{st.screen='result';render();window.scrollTo(0,0);save();if(C.award.up)setTimeout(()=>sfx('level'),900)},stg?2700:200);
+  return true;
+}
+async function save(){
+  const C=st.c,r=C.result;
+  const row={nome:st.name,paciente:C.cs.nome,caso:C.cs.doenca,desfecho:r.g,pontos:r.total,turnos:C.turns,gasto:C.spent,modo:st.mode,nivel:C.award?C.award.after.name:''};
+  try{await fetch(API_URL,{method:'POST',body:JSON.stringify(row)});C.saved='ok'}
+  catch(e){try{await fetch(API_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(row)});C.saved='ok'}catch(e2){C.saved='erro'}}
+  boardSig='';
+  const n=document.getElementById('saveNote');if(n)n.textContent=saveText();
+}
+const saveText=()=>({ok:'Resultado enviado ao painel da turma.',off:'Este acesso não grava no painel da turma; mostre esta tela ao professor.',erro:'Não foi possível enviar ao painel; mostre esta tela ao professor.'}[st.c.saved]||'Enviando resultado ao painel…');
+
+/* ---------- eventos ---------- */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-act]');if(!t)return;
+  const act=t.dataset.act,v=t.dataset.v;
+  if(act==='card')tapCard(v);
+  else if(act==='playsel')playSel();
+  else if(act==='cancel'){st.c.sel=null;$('#overlay').innerHTML=''}
+  else if(act==='hint')askHint();
+  else if(act==='triage')chooseTriage(v);
+  else if(act==='tut')tutorial(+v);
+  else if(act==='sound')toggleSound();
+  else if(act==='mode'){st.mode=v;remember();render()}
+  else if(act==='tab'){st.c.tab=v;st.c.sel=null;updAll()}
+  else if(act==='swap')swapHand();
+  else if(act==='log')showLog();
+  else if(act==='close')$('#overlay').innerHTML='';
+  else if(act==='avatar'){st.avatar=v;remember();render()}
+  else if(act==='go'){st.screen=v;render();window.scrollTo(0,0)}
+  else if(act==='next')startCase();
+  else if(act==='startrun')startRun();
+  else if(act==='pick')startCase(v);
+  else if(act==='item'){st.run.items.push(v);st.run.itemOffer=null;sfx('good');st.screen='pick';render();window.scrollTo(0,0)}
+  else if(act==='runnext'){st.screen=st.run.scores.length<RUN_SIZE?(st.run.items.length<st.run.scores.length&&st.run.items.length<ITEMS.length?'item':'pick'):'runend';render();window.scrollTo(0,0)}
+  else if(act==='newrun')startRun();
+  else if(act==='endrun'){st.run=null;st.screen='clinic';render();window.scrollTo(0,0)}
+  else if(act==='finish'){st.c.busy=true;finish()}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#overlay').innerHTML&&!$('#overlay .triage,#overlay .coach'))$('#overlay').innerHTML=''});
+document.addEventListener('submit',e=>{e.preventDefault();const n=$('#nome').value.trim().replace(/\s+/g,' ');
+  if(n.length<3||!n.includes(' ')){$('#nomeErr').hidden=false;return}st.name=n;remember();st.screen=st.avatar?(st.rulesSeen?'clinic':'rules'):'avatar';render();});
+let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(st.screen==='case')updHand()},120)});
+
+/* ---------- telas ---------- */
+function vStart(){
+  const sample=[['anam',{t:'Ele está bebendo mais água?'}],['exm',{t:'Glicemia',c:20}],['tx',{t:'Soro na veia (fluidoterapia)'}]];
+  return `<section class="cover"><div class="logo"><span class="badge">Endocrinologia gastrointestinal</span>
+   <h1>Plantão<span>Endócrino Vet</span></h1></div>
+   <div class="fan">${sample.map(([k,c],i)=>`<div class="bigtcg c${i+1}">${tcgHTML(k,c)}</div>`).join('')}</div>
+   <p class="intro">Monte o atendimento com suas cartas: pergunte, examine, peça exames, feche o diagnóstico e trate. Cuidado com o tempo e o dinheiro do tutor!</p>
+   <form class="panel" novalidate><label for="nome"><h3>Seu nome completo</h3></label>
+    <input type="text" id="nome" autocomplete="name" placeholder="Ex.: Maria Souza Lima" value="${esc(st.name)}">
+    <p id="nomeErr" class="bad-t" hidden>Digite nome e sobrenome para aparecer no painel da turma.</p>
+    <button class="btn" type="submit">Entrar no plantão</button></form>
+   <button class="btn ghost" data-act="go" data-v="board">Ver painel da turma</button></section>`;
+}
+function vAvatar(){
+  return `<section class="cover"><p class="eyebrow">Olá, ${esc(first(st.name))}</p><h2>Escolha seu personagem</h2>
+   <div class="avatars"><button class="choice" data-act="avatar" data-v="f" aria-pressed="${st.avatar==='f'}">${avatarSVG(1)}Veterinária</button>
+    <button class="choice" data-act="avatar" data-v="m" aria-pressed="${st.avatar==='m'}">${avatarSVG(0)}Veterinário</button></div>
+   <button class="btn" data-act="go" data-v="rules" ${st.avatar?'':'disabled'}>Continuar</button></section>`;
+}
+function face(m){const [path,fill]=MOOD[m];return `<svg viewBox="183 27 34 34" aria-hidden="true"><circle cx="200" cy="44" r="15" fill="${fill}" stroke="#1d2f2d" stroke-width="2"/><circle cx="194.5" cy="40" r="2.2" fill="#1d2f2d"/><circle cx="205.5" cy="40" r="2.2" fill="#1d2f2d"/><path d="${path}" stroke="#1d2f2d" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>`}
+function vRules(){
+  st.rulesSeen=true;
+  const step=(k,t,txt)=>`<li><span class="ic s-${k}" style="background:var(--suit)">${ICON[k]}</span><div><b>${t}</b>${txt}</div></li>`;
+  return `<section class="cover"><p class="eyebrow">Antes de começar</p><h2>Como jogar</h2>
+   <p>Você atende um paciente. Primeiro faz a triagem, depois usa as pilhas de cartas:</p>
+   <ol class="rules">
+    <li><span class="ic s-emg" style="background:var(--suit)">${ICON.emg}</span><div><b>Triagem</b>Olhe os sinais vitais: o paciente está estável ou instável? Se estiver instável, aparece a pilha vermelha de <b>Emergência</b>. Use-a primeiro!</div></li>
+    ${step('anam','1. Anamnese','Faça perguntas ao tutor.')}
+    ${step('fis','2. Exame físico','Examine o animal.')}
+    ${step('exm','3. Laboratório','Peça exames. Cada um custa dinheiro do tutor.')}
+    ${step('dx','4. Diagnóstico','Escolha o que o animal tem.')}
+    ${step('tx','5. Conduta','Escolha o tratamento. A ordem importa!')}
+   </ol>
+   <div class="panel"><h3>Regras rápidas</h3><ul class="list">
+    <li>Toque numa carta para ver maior, depois em <b>Jogar carta</b>.</li>
+    <li>Cada carta gasta <b>1 turno</b>. O tempo de consulta é limitado.</li>
+    <li>Animais graves <b>pioram a cada turno</b> até receberem o tratamento certo.</li>
+    <li>As pilhas são livres: toque em qualquer uma, quando quiser. A ordem 1 a 5 é só uma sugestão, e a pilha sugerida balança em amarelo.</li>
+    <li>Travou? O professor ajuda no botão <b>Pedir dica</b> (grátis no modo Fácil).</li>
+    <li>Escolha a dificuldade na sala de espera: <b>Fácil</b> (sem limite de turnos) ou <b>Desafio</b>.</li>
+    <li>Cada atendimento dá <b>XP</b> para subir de nível e desbloquear conquistas.</li>
+    <li><b>Plantão:</b> atenda 3 pacientes seguidos, escolhendo quem entra. Entre um e outro, ganhe um <b>item</b> que ajuda até o fim do plantão.</li>
+    <li>No fim, toque em <b>Encerrar atendimento</b> para ver o desfecho e seu relatório.</li></ul></div>
+   <div class="panel"><h3>A carinha acima do pet mostra como você está indo</h3>
+    <div class="faces"><div>${face('feliz')}Boa escolha</div><div>${face('serio')}Não ajudou muito</div><div>${face('triste')}Erro</div></div></div>
+   <button class="btn" data-act="go" data-v="clinic">Entendi, ir para a clínica</button></section>`;
+}
+function vClinic(){
+  const queue=CASES.filter(c=>!st.seen.includes(c.id));
+  const show=(queue.length?queue:CASES).slice(0,4);
+  const pairs=show.map((c,i)=>{const x=58+i*95;return `<g transform="translate(${x} 196)">
+    <g transform="translate(22 0) scale(.55)">${person(c.tutor)}</g>
+    <g transform="translate(-14 0) scale(${c.esp==='gato'?.5:.45})">${petSVG(c)}</g></g>`}).join('');
+  return `<section class="cover">
+   <div class="stage"><svg class="scene" viewBox="0 0 400 220" role="img" aria-label="Sala de espera com pacientes e tutores">
+    <rect width="400" height="160" fill="#f1e4cf"/><rect y="118" width="400" height="42" fill="#e4d2b4"/><rect y="116" width="400" height="4" fill="#cfb68f"/>
+    <rect y="160" width="400" height="60" fill="#ece5d6"/><path d="M0 180H400M0 200H400" stroke="#d6ccb7"/>
+    <rect x="130" y="16" width="140" height="30" rx="6" fill="#0f6e66"/><text x="200" y="36" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="sans-serif">Recepção · Plantão</text>
+    <rect x="18" y="30" width="54" height="40" rx="3" fill="#fffdf6" stroke="#d8cfb9"/><text x="45" y="45" text-anchor="middle" font-size="6.5" font-weight="700" fill="#c0443a" font-family="sans-serif">PESE SEU PET</text><text x="45" y="58" text-anchor="middle" font-size="9" font-family="monospace" fill="#1d2f2d">0,0 kg</text>
+    <rect x="320" y="28" width="62" height="44" rx="3" fill="#fffdf6" stroke="#d8cfb9"/><path d="M332 40h38M332 48h30M332 56h34" stroke="#cfc3a6" stroke-width="3"/>
+    ${pairs}</svg></div>
+   <div class="panel" style="flex-direction:row;align-items:center"><div style="width:56px;flex:0 0 56px">${avatarSVG(st.avatar==='f')}</div>
+    <div style="min-width:0"><p class="eyebrow">Plantonista</p><h2>${st.avatar==='f'?'Dra.':'Dr.'} ${esc(st.name)}</h2>
+    <p class="muted">${queue.length} paciente${queue.length===1?'':'s'} na fila. O próximo é sorteado.</p></div></div>
+   <div class="panel"><div class="xprow"><span class="lvlnum">${levelOf(PROG.xp).i+1}</span><div style="min-width:0;flex:1"><p class="eyebrow">Seu nível</p><b class="lvlname">${esc(levelOf(PROG.xp).name)}</b>
+     <div class="xpbar"><i style="width:${levelOf(PROG.xp).pct}%"></i></div><small class="muted">${PROG.xp} XP${levelOf(PROG.xp).next!==null?` · faltam ${levelOf(PROG.xp).next-PROG.xp} XP para o próximo nível`:' · nível máximo'}</small></div></div>
+    <div class="medals">${BADGES.map(b=>badgeHTML(b[0],PROG.badges.includes(b[0]))).join('')}</div></div>
+   <div class="panel"><p class="eyebrow">Dificuldade</p><div class="modes">
+    <button class="mode" data-act="mode" data-v="facil" aria-pressed="${st.mode!=='desafio'}"><b>Fácil</b><small>Turnos sem limite, dicas grátis e 50% a mais de orçamento.</small></button>
+    <button class="mode" data-act="mode" data-v="desafio" aria-pressed="${st.mode==='desafio'}"><b>Desafio</b><small>Turnos limitados, dica custa 2 pontos. Ganha 50% a mais de XP.</small></button></div></div>
+   <button class="btn" data-act="startrun">Começar plantão (${RUN_SIZE} pacientes)</button>
+   <button class="btn ghost" data-act="next">Treinar um caso avulso</button>
+   <div class="row"><button class="btn ghost" data-act="go" data-v="rules">Como jogar</button><button class="btn ghost" data-act="go" data-v="board">Painel da turma</button><button class="btn ghost" data-act="go" data-v="avatar">Trocar personagem</button></div></section>`;
+}
+function vCase(){
+  const cs=st.c.cs;
+  return `<div class="hud" id="hud"></div>
+   <div class="vpanel" id="vitals" aria-live="polite" aria-label="Sinais vitais"></div>
+   <div class="stage" id="stage"><svg class="scene" id="sceneSvg" viewBox="0 0 400 260" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Consultório: ${esc(cs.nome)} na mesa de atendimento, com o tutor ao lado">
+    ${roomBack()}${ivSVG()}
+    <g transform="translate(98 238) scale(.8)">${profPerson()}</g>
+    <g transform="translate(48 247) scale(.95)">${vetPerson(st.avatar==='f','vetFig')}</g>
+    ${tableSVG()}
+    <g class="enter"><g transform="translate(198 167) scale(${cs.scale})" id="pet">${petSVG(cs)}</g></g>
+    <g class="enter2"><g transform="translate(345 247) scale(.95)">${person(Object.assign({id:'tutorFig'},cs.tutor))}</g></g>
+    ${moodSVG()}
+   </svg>
+   <div class="bubble vet" id="b-vet"></div><div class="bubble tutor" id="b-tutor"></div>
+   <span class="tag">${esc(cs.nome)} · ${esc(cs.resumo)}</span>
+   <div class="intent" id="intent" hidden></div>
+   <button class="sndbtn" id="soundBtn" data-act="sound" aria-label="Som" aria-pressed="${SND.on}">${soundIcon()}</button></div>
+   <div class="profbar" id="profbar" aria-live="polite"><span class="hd"><svg viewBox="-22 -166 44 44" aria-hidden="true">${person({coat:true,style:'short',hair:'#c9c9c9',skin:'#e3b08a',glasses:true,beard:true})}</svg></span>
+    <div><b>Professor(a) na sala</b><span id="profText">Estou aqui para ajudar. Siga as etapas da mesa, da esquerda para a direita.</span></div></div>
+   <div class="queixa">${ICON.anam}<div><b>Queixa do tutor</b>“${esc(cs.fala)}”</div></div>
+   <div class="clues" id="clues" aria-label="Quadro de pistas"></div>
+   <section class="table" aria-label="Suas cartas">
+    <p class="tabletitle">Pilhas livres: toque em qualquer uma</p>
+    <div class="decks" role="tablist" id="decks"></div>
+    <div class="handbar" id="handbar"></div>
+    <div class="hand" id="hand"></div>
+   </section>
+   <div class="actions"><button class="btn ghost" data-act="log">Prontuário</button><button class="btn ghost" data-act="hint">Pedir dica</button><button class="btn end" data-act="finish" id="finishBtn">Encerrar</button></div>`;
+}
+function updAll(){updHud();updHand();updScene();updVitals()}
+function updHud(){
+  const C=st.c,cs=C.cs,pct=Math.round(C.stab),inf=!isFinite(C.maxT),left=inf?Infinity:C.maxT-C.turns,bud=C.budget-C.spent;
+  const lv=v=>v>=60?'':v>=30?' mid':' low';
+  const tp=inf?100:Math.round(left/C.maxT*100);
+  $('#hud').innerHTML=`
+   <div class="meter${!C.stabilized&&pct<30?' pulse':''}">${SVG_HEART}<span>${C.stabilized||!cs.decay?'Vida':'Vida ↓'}</span><b>${pct}</b><div class="bar${lv(pct)}"><i style="width:${pct}%"></i></div></div>
+   <div class="meter${left<=3?' pulse':''}">${SVG_HOUR}<span>${inf&&innerWidth>=900?'Turnos · Fácil':'Turnos'}</span><b>${inf?'∞':left}</b><div class="bar${lv(tp)}"><i style="width:${tp}%"></i></div></div>
+   <div class="meter">${SVG_COIN}<span>Tutor</span><b>${money(bud)}</b><div class="bar${lv(Math.round(bud/C.budget*100))}"><i style="width:${Math.round(bud/C.budget*100)}%"></i></div></div>
+   <div class="dxchip"><span>Hipótese</span><b>${C.dx?esc(cardOf(C.dx)[1].t):'—'}</b></div>
+   ${cs.alerta&&!C.stabilized?`<div class="dxchip alarm">${esc(cs.alerta)}</div>`:''}`;
+  const ready=C.dx&&cs.tx.some(c=>C.played.includes(c.id));
+  const fb=$('#finishBtn');fb.disabled=!ready;fb.title=ready?'':'Escolha um diagnóstico e jogue ao menos uma conduta';
+}
+function updScene(){
+  const C=st.c,pet=$('#pet');
+  if(pet)pet.classList.toggle('sick',C.stab<40);
+  const iv=$('#iv');if(iv)iv.classList.toggle('on',C.played.some(i=>FLUIDS.includes(i)));
+  const it=$('#intent');if(it){const on=C.triage&&!C.result&&!C.stabilized&&C.cs.decay>0;it.hidden=!on;if(on)it.innerHTML=`<b>Próxima carta: −${C.cs.decay} vida</b><span>até estabilizar</span>`}
+  const svg=$('#sceneSvg');if(svg)svg.classList.toggle('crit',C.stab<30);
+  alarm(!C.result&&!C.stabilized&&C.cs.decay>0&&C.stab<35);
+  const cl=$('#clues');if(cl){cl.innerHTML=`<span class="lbl">Pistas</span>`+(C.clues.length?C.clues.map(x=>`<span class="clue s-${x.k}${x.fresh?' new':''}"><b>${esc(x.q)}</b> ${esc(x.a)}</span>`).join(''):'<span class="none">Os achados aparecem aqui.</span>');C.clues.forEach(x=>x.fresh=false);cl.scrollLeft=0}
+}
+function phaseDone(t){
+  const C=st.c,cs=C.cs;
+  if(t==='emg')return C.stabilized||!C.hand.emg.length;
+  if(t==='dx')return !!C.dx;
+  if(t==='tx')return false;
+  const n=C.played.filter(id=>cs[t].some(z=>z.id===id)).length;
+  const essOk=cs[t].filter(z=>z.v==='E').every(z=>C.played.includes(z.id));
+  return (essOk&&n>0)||n>=3||!C.hand[t].length;
+}
+function nextStep(){
+  const C=st.c;
+  if(C.emgOn&&!C.stabilized)return 'emg';
+  for(const [t] of PH)if(!phaseDone(t))return t;
+  return null;
+}
+function updHand(){
+  const C=st.c,cs=C.cs,k=C.tab;
+  const cnt=t=>t==='dx'?(C.dx?'✓':''):t==='emg'?(C.stabilized?'✓':''):C.played.filter(id=>cs[t].some(z=>z.id===id)).length||'';
+  const nx=nextStep();
+  const SHORT=innerWidth<430?{emg:'Emerg.',anam:'Anamn.',fis:'Físico',exm:'Lab.',dx:'Diagn.',tx:'Conduta'}:{emg:'Emergência',anam:'Anamnese',fis:'Ex. físico',exm:'Laboratório',dx:'Diagnóstico',tx:'Conduta'};
+  const piles=C.emgOn?[['emg','Emergência'],...PH]:PH;
+  $('#decks').style.gridTemplateColumns=`repeat(${piles.length},minmax(0,1fr))`;
+  $('#decks').innerHTML=piles.map(([t,l],i)=>{const n=C.emgOn?i:i+1;
+    const lab=t==='emg'?(C.stabilized?'estável ✓':'urgente!'):nx===t&&k!==t?'próxima!':'etapa '+n;
+    return `<button class="deck s-${t}${nx===t&&k!==t?' next':''}${t==='emg'&&!C.stabilized?' alarm':''}" role="tab" aria-selected="${k===t}" aria-label="${t==='emg'?'Emergência':'Etapa '+n+': '+l}" data-act="tab" data-v="${t}">
+    <span class="back"><i>${ICON[t]}</i></span><span class="lb">${SHORT[t]}</span><span class="st${t==='emg'&&!C.stabilized||nx===t&&k!==t?' flag':''}">${lab}</span><span class="n">${cnt(t)}</span></button>`}).join('');
+  const ids=C.hand[k];
+  if(nx&&nx!==k&&phaseDone(k)){
+    const lbl=nx==='emg'?'Emergência':PH.find(p=>p[0]===nx)[1];
+    $('#handbar').innerHTML=`<div class="stepnote" style="flex:1"><span>${nx==='emg'?'Estabilize primeiro!':nx==='tx'&&!phaseDone('dx')?'Hora de tratar!':'Boa! Próxima etapa:'}</span><button data-act="tab" data-v="${nx}">${esc(lbl)} →</button></div>`;
+  }else{
+    const hint=k==='emg'?(C.stabilized?'Paciente estável. Siga a consulta pelas outras pilhas.':'Escolha o que salva o paciente agora.'):k==='dx'?'Escolha a doença. Não gasta turno.':k==='tx'?'Jogue as condutas na ordem certa.':k==='exm'?'Exames gastam o dinheiro do tutor.':k==='fis'?'Toque numa carta para examinar.':'Toque numa carta para perguntar.';
+    $('#handbar').innerHTML=`<span class="hint">${hint}</span>${k!=='dx'&&C.deck[k]&&C.deck[k].length?`<button class="linkbtn" data-act="swap">Trocar (${C.deck[k].length}) · 1 turno</button>`:''}`;
+  }
+  const hand=$('#hand');
+  if(!ids.length){hand.innerHTML=`<div class="empty">Você já jogou todas as cartas de ${KIND[k].toLowerCase()}.</div>`;return}
+  const W=hand.clientWidth||340,cw=innerWidth>=900?150:(innerHeight<=660?72:84),n=ids.length;
+  const rot=n>5?3:4,edge=cw*.12+8;
+  const step=n>1?Math.min(cw*.72,(W-cw-2*edge)/(n-1)):0;
+  let delay=0;
+  if(ids.some(id=>!C.shown.has(id)))sfx('deal');
+  hand.innerHTML=ids.map((id,i)=>{
+    const [ck,c]=cardOf(id),o=i-(n-1)/2;
+    const rr=o*rot*Math.PI/180,ch=cw*1.414,cx=W/2+o*step+(0.8*ch+58)*Math.sin(rr),half=cw*1.22/2+10;
+    let hx=0;if(cx-half<0)hx=(half-cx)/Math.cos(rr);else if(cx+half>W)hx=(W-half-cx)/Math.cos(rr);
+    const isNew=!C.shown.has(id);if(isNew)C.shown.add(id);
+    const broke=ck==='exm'&&C.spent+c.c>C.budget;
+    const cls=['pcard','s-'+k];if(C.fresh.has(id))cls.push('new');if(broke)cls.push('broke');if(k==='dx'&&C.dx===id)cls.push('chosen');
+    const d=isNew?(delay++*70)+'ms':'0ms';
+    return `<button class="${cls.join(' ')}" data-act="card" data-v="${id}" data-id="${id}" aria-label="${esc(KIND[k]+': '+c.t)}"
+      style="--x:${(o*step).toFixed(1)}px;--y:${(Math.pow(Math.abs(o),1.5)*3).toFixed(1)}px;--r:${(o*rot).toFixed(1)}deg;--hx:${hx.toFixed(1)}px;--z:${i+1};--d:${d}">
+      ${tcgHTML(ck,c,k==='emg'?'urgent':'',isNew?'':'animation:none')}</button>`}).join('');
+}
+function vResult(){
+  const C=st.c,cs=C.cs,r=C.result,P=r.P;
+  const essMissed=[],hits=[],warns=[];
+  [['anam','Pergunta'],['fis','Exame físico'],['exm','Exame']].forEach(([k,l])=>cs[k].forEach(c=>{
+    if(c.v==='E')(P.has(c.id)?hits:essMissed).push(`${l}: ${c.t}`);
+    if(c.v==='D'&&P.has(c.id))warns.push(`${c.t}: ${c.n}`);
+  }));
+  r.okT.forEach(c=>{if(P.has(c.id))hits.push('Conduta: '+c.t)});
+  if(C.triage==='ok')hits.unshift('Triagem: '+(C.tri.inst?'reconheceu o paciente instável':'reconheceu o paciente estável'));
+  const errs=[...(C.triage==='erro'?['Triagem errada (−5 pontos): o paciente estava '+(C.tri.inst?'instável':'estável')+'.']:[]),...essMissed.map(t=>'Faltou — '+t),...r.waste.map(c=>`Exame desnecessário: ${c.t} (−${money(c.c)})`),...r.badT.map(c=>`Conduta errada: ${c.t}. ${c.n}`)];
+  if(r.dxc&&r.dxc.pts<20)errs.push(`Diagnóstico “${r.dxc.t}”: ${r.dxc.n}`);
+  if(!r.dxc)errs.push('Nenhum diagnóstico escolhido.');
+  const correctDx=cs.dx.reduce((m,z)=>z.pts>m.pts?z:m,cs.dx[0]);
+  return `<section class="cover"><article class="report">
+   <div class="hd"><span>Relatório do plantão</span><span>${esc(cs.nome)} · ${esc(cs.doenca)}</span></div>
+   <div class="stars">${[1,2,3].map(i=>STAR(i<=r.stars)).join('')}</div>
+   <span class="stamp g-${r.g}">${G[r.g]}</span><p class="verdict">${esc(r.txt)}</p>
+   ${C.award?`<div class="xpbox${C.award.up?' up':''}"><div class="xprow"><span class="lvlnum">${C.award.after.i+1}</span><div style="min-width:0;flex:1"><b>${esc(C.award.after.name)}</b><div class="xpbar"><i style="width:${C.award.after.pct}%"></i></div></div><span class="gain">+${C.award.gain} XP</span></div>
+    ${C.award.up?'<p class="levelup">Subiu de nível!</p>':''}${C.award.got.length?`<p class="eyebrow">Nova conquista!</p><div class="medals">${C.award.got.map(id=>badgeHTML(id,true,true)).join('')}</div>`:''}</div>`:''}
+   <div class="sect"><p class="eyebrow">Decisão-chave do caso</p><p><b>${esc(cs.key)}</b></p></div>
+   <div class="sect"><div class="score"><b id="scoreNum" data-to="${r.total}">0</b><span class="muted">/ 100 pontos · ${C.turns}${isFinite(C.maxT)?' de '+C.maxT:''} turnos · ${money(C.spent)} de ${money(C.budget)} · modo ${st.mode==='desafio'?'Desafio':'Fácil'}</span></div>
+    <div class="phases">${r.fases.map(([n,v,m])=>`<div class="ph"><span>${n}</span><span class="v">${v}/${m}</span><div class="bar"><i style="width:${Math.round(v/m*100)}%"></i></div></div>`).join('')}</div>
+    ${C.hintsAsked?`<p class="muted" style="font-size:.85rem">Dicas pedidas ao professor: ${C.hintsAsked} ${r.pen?`(−${r.pen} pontos)`:'(grátis no modo Fácil)'}</p>`:''}
+    <p class="muted" id="saveNote" style="font-size:.85rem">${esc(saveText())}</p></div>
+   <div class="sect"><h3 class="ok-t">O que você fez certo</h3>${hits.length?`<ul class="list">${hits.map(h=>`<li>${esc(h)}</li>`).join('')}</ul>`:'<p class="muted">Nenhuma carta essencial jogada.</p>'}</div>
+   <div class="sect"><h3 class="bad-t">O que faltou ou deu errado</h3>${errs.length?`<ul class="list">${errs.map(h=>`<li>${esc(h)}</li>`).join('')}</ul>`:'<p class="muted">Nada a apontar. Atendimento completo.</p>'}
+    ${warns.length?`<h3 class="warn-t">Atenção à interpretação</h3><ul class="list">${warns.map(h=>`<li>${esc(h)}</li>`).join('')}</ul>`:''}</div>
+   <div class="sect"><h3>Gabarito</h3><p><b>Diagnóstico:</b> ${esc(correctDx.t)}</p><p><b>Conduta ideal, na ordem:</b></p>
+    <ol class="ideal">${cs.tx.filter(c=>c.ok).map(c=>`<li>${esc(c.t)}</li>`).join('')}</ol></div>
+   <div class="sect"><p class="eyebrow">Lição do caso</p><p>${esc(cs.licao)}</p></div></article>
+   <div class="row">${st.run?`<button class="btn" data-act="runnext">${st.run.scores.length<RUN_SIZE?`Próximo paciente (${st.run.scores.length+1}/${RUN_SIZE})`:'Ver resumo do plantão'}</button>`:'<button class="btn" data-act="next">Atender outro paciente</button>'}<button class="btn ghost" data-act="go" data-v="board">Painel da turma</button></div></section>`;
+}
+const API_URL='https://script.google.com/macros/s/AKfycbyObGRSFkROLqYIr_cxp4AXg9_m7FePWkTzAJ60XzEVlUsoxMDA4oCfgut84hCgzmKvVg/exec';
+let boardRows=null,boardState='loading',unsub=null,boardSig='';
+async function pullBoard(){
+  try{const r=await fetch(API_URL,{cache:'no-store'});const rows=await r.json();const sig=JSON.stringify(rows);
+    if(sig!==boardSig||boardState!=='ok'){boardSig=sig;boardRows=rows;boardState='ok';if(st.screen==='board'){const y=scrollY;render();scrollTo(0,y)}}}
+  catch(e){if(boardState!=='ok'){boardState='erro';if(st.screen==='board')render()}}
+}
+function subscribeBoard(){
+  if(unsub)return;unsub=setInterval(()=>{if(st.screen==='board')pullBoard()},8000);pullBoard();
+}
+function vBoard(){
+  subscribeBoard();
+  const back=`<button class="btn ghost" data-act="go" data-v="${st.name?(st.avatar?'clinic':'avatar'):'start'}">Voltar</button>`;
+  let inner;
+  if(boardState==='loading')inner='<p class="muted">Carregando resultados…</p>';
+  else if(boardState!=='ok')inner='<p class="muted">O painel não está disponível neste acesso. Os resultados ficam na tela de cada aluno.</p>';
+  else if(!boardRows.length)inner='<p class="muted">Ninguém terminou um atendimento ainda. Os resultados aparecem aqui assim que cada aluno encerrar o caso.</p>';
+  else{
+    const c={bom:0,ressalva:0,ruim:0,obito:0};boardRows.forEach(r=>c[r.desfecho]!==undefined&&c[r.desfecho]++);
+    inner=`<div class="counts">${Object.keys(c).map(k=>`<div class="g-${k}"><b>${c[k]}</b><span>${G[k]}</span></div>`).join('')}</div>
+    <div class="scroll"><table class="board"><thead><tr><th>Aluno</th><th>Paciente</th><th>Desfecho</th><th style="text-align:right">Pontos</th></tr></thead><tbody>
+    ${boardRows.map(r=>`<tr${r.nome===st.name?' style="background:var(--scrub-soft)"':''}><td><b>${esc(r.nome||'')}</b></td><td>${esc(r.paciente||'')}<br><span class="muted" style="font-size:.8rem">${esc(r.caso||'')}</span></td>
+     <td><span class="chip g-${esc(r.desfecho)}">${G[r.desfecho]||''}</span></td><td class="pts">${Number(r.pontos)||0}</td></tr>`).join('')}</tbody></table></div>`;
+  }
+  return `<section class="cover"><p class="eyebrow">Ao vivo</p><h2>Painel da turma</h2><div class="panel">${inner}</div>${back}</section>`;
+}
+function countUp(){
+  const el=$('#scoreNum');if(!el)return;const to=+el.dataset.to;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){el.textContent=to;return}
+  const t0=performance.now();const step=t=>{const p=Math.min(1,(t-t0)/1100);el.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step)};requestAnimationFrame(step);
+}
+function fx(text,color,dx){
+  const stg=$('#stage');if(!stg)return;
+  const e=document.createElement('span');e.className='fx';e.textContent=text;e.style.setProperty('--c',color);if(dx)e.style.left=`calc(50% + ${dx}px)`;
+  stg.appendChild(e);setTimeout(()=>e.remove(),1500);
+}
+function burst(color,n){
+  const stg=$('#stage');if(!stg)return;
+  const r=document.createElement('span');r.className='ring';r.style.setProperty('--c',color);stg.appendChild(r);setTimeout(()=>r.remove(),700);
+  for(let i=0;i<(n||8);i++){const s=document.createElement('span');s.className='spark';const a=Math.PI*2*i/(n||8)+Math.random()*.4,d=50+Math.random()*30;
+    s.style.setProperty('--dx',(Math.cos(a)*d).toFixed(0)+'px');s.style.setProperty('--dy',(Math.sin(a)*d).toFixed(0)+'px');s.style.setProperty('--c',color);
+    s.innerHTML='<svg viewBox="0 0 20 20"><path d="M10 0l2.5 7.5L20 10l-7.5 2.5L10 20l-2.5-7.5L0 10l7.5-2.5z" fill="currentColor" stroke="#1b2340" stroke-width="1.2"/></svg>';
+    stg.appendChild(s);setTimeout(()=>s.remove(),900)}
+}
+function render(){
+  $('#overlay').innerHTML='';
+  document.documentElement.classList.toggle('casemode',st.screen==='case');
+  let gs=$('#globalSnd');if(!gs){gs=document.createElement('button');gs.id='globalSnd';gs.className='sndbtn global';gs.dataset.act='sound';gs.setAttribute('aria-label','Som e música');document.body.appendChild(gs)}
+  gs.innerHTML=soundIcon();gs.setAttribute('aria-pressed',SND.on);gs.hidden=st.screen==='case';syncMusic();
+  const v={start:vStart,avatar:vAvatar,rules:vRules,clinic:vClinic,case:vCase,result:vResult,board:vBoard,pick:vPick,item:vItem,runend:vRunEnd}[st.screen]();
+  $('#app').innerHTML=v;
+  if(st.screen==='case')updAll();
+  if(st.screen==='result'||st.screen==='runend')countUp();
+}
+render();
+</script>
+
+</body>
+</html>
