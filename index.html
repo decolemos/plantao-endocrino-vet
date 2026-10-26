@@ -698,6 +698,18 @@ html:not(.casemode) body{min-height:100vh}
  .itemscr .itemcard .gem{width:clamp(24px,4vh,40px);height:clamp(24px,4vh,40px);font-size:clamp(.9rem,2.2vh,1.3rem)}
  .itemscr .itemcard .type{font-size:clamp(.6rem,1.6vh,.9rem)}
 }
+/* botão sair do atendimento */
+.quitbtn{position:absolute;left:8px;bottom:8px;z-index:4;height:34px;padding:0 12px;border-radius:999px;border:2.5px solid var(--night);background:var(--cream);color:var(--night);font-weight:800;font-size:.8rem;box-shadow:0 2px 0 var(--night);cursor:pointer}
+.quitbtn:hover{background:#ffd9de}
+.quitbtn:active{transform:translateY(2px);box-shadow:none}
+@media (max-width:899px){html.casemode .quitbtn{height:28px;padding:0 9px;font-size:.7rem;left:6px;bottom:6px}}
+.stage .tag{max-width:calc(100% - 170px)}@media (max-width:899px){html.casemode .stage .tag{max-width:calc(100% - 128px)}}
+.quitlayer{z-index:80}
+.quitlink{align-self:center;background:none;border:0;color:var(--ink);opacity:.7;font-weight:800;font-size:.8rem;text-decoration:underline;padding:4px 8px;cursor:pointer}.quitlink:hover{opacity:1}
+.quitcard h3{margin:0;font-family:var(--f-display);font-weight:400;font-size:1.35rem;line-height:1.15}
+.quitcard p{margin:0;font-size:.92rem;line-height:1.35}
+.quitcard .row{display:flex;gap:8px;flex-wrap:wrap}.quitcard .row .btn{flex:1 1 160px}
+.btn.danger{background:linear-gradient(#ff8f9f,#e8414f);color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.25)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 
@@ -1538,6 +1550,19 @@ function startCase(forceId){
   setTimeout(()=>say('tutor',innerWidth>=900?cs.fala:'Doutor(a), por favor, ajude '+(cs.esp==='gato'&&!/a$/.test(cs.nome)?'o ':'')+cs.nome+'!','Tutor(a) de '+cs.nome),950);
   setTimeout(showTriage,2300);
 }
+function askQuit(){
+  const C=st.c;if(!C||C.result||$('#quitbox'))return;sfx('click');
+  const box=document.createElement('div');box.id='quitbox';box.className='overlay quitlayer';box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-label','Cancelar atendimento');
+  box.innerHTML=`<div class="triage quitcard"><h3>Cancelar o atendimento de ${esc(C.cs.nome)}?</h3>
+    <p>Você volta para a clínica. Este atendimento <b>não conta pontos</b> e <b>não vai para o painel da turma</b>.${st.run?' O plantão em andamento também será encerrado.':''}</p>
+    <div class="row"><button class="btn" data-act="quitno">Continuar atendendo</button><button class="btn danger" data-act="quityes">Sair sem salvar</button></div></div>`;
+  document.body.appendChild(box);box.querySelector('[data-act="quitno"]').focus();
+}
+function doQuit(){
+  const C=st.c;const q=$('#quitbox');if(q)q.remove();if(!C||C.result)return;
+  C.quit=true;C.busy=true;try{alarm(false)}catch(e){}
+  $('#overlay').innerHTML='';st.run=null;st.screen='clinic';render();window.scrollTo(0,0);
+}
 function refillFrom(deck,hand,k){while(hand[k].length<HAND&&deck[k].length)hand[k].push(deck[k].shift())}
 function showTriage(){
   const C=st.c;if(st.screen!=='case'||C.triage)return;
@@ -1547,7 +1572,7 @@ function showTriage(){
    <div class="vitals">${C.tri.v.map(([l,v,a])=>`<div class="${a?'alto':''}"><span>${esc(l)}</span><b>${esc(v)}</b></div>`).join('')}</div>
    <div class="tchoices">
     <button class="tbtn ok" data-act="triage" data-v="0"><b>Estável</b>Consulta normal, com calma</button>
-    <button class="tbtn bad" data-act="triage" data-v="1"><b>Instável</b>Estabilizar primeiro</button></div></div></div>`;
+    <button class="tbtn bad" data-act="triage" data-v="1"><b>Instável</b>Estabilizar primeiro</button></div><button class="quitlink" data-act="quit">✕ Cancelar atendimento</button></div></div>`;
 }
 function chooseTriage(v){
   const C=st.c;if(C.triage)return;
@@ -1735,7 +1760,7 @@ function evaluate(){
   return {g,txt,fases,total,stars,pen,dxc,waste,badT,okT,P};
 }
 function finish(){
-  const C=st.c;if(C.result)return true;
+  const C=st.c;if(C.result||C.quit)return true;
   C.result=evaluate();C.busy=true;award();alarm(false);updVitals();
   if(st.run)st.run.scores.push({id:C.cs.id,nome:C.cs.nome,caso:C.cs.doenca,g:C.result.g,total:C.result.total,stars:C.result.stars});
   const g=C.result.g,stg=$('#stage');$('#overlay').innerHTML='';
@@ -1745,7 +1770,7 @@ function finish(){
     setTimeout(()=>{fx(T[0],T[1]);if(g==='bom'){burst('#ffd36b',12);setTimeout(()=>burst('#7ef0b9',12),350);setTimeout(()=>burst('#ff8fb8',12),700)}},300)}
   sfx({bom:'win',ressalva:'ok',ruim:'sad',obito:'lose'}[g]);
   if(g==='bom')setTimeout(()=>petSound(C.cs,'happy'),700);else if(g==='ruim')setTimeout(()=>petSound(C.cs,'sad'),700);
-  setTimeout(()=>{st.screen='result';render();window.scrollTo(0,0);save();if(C.award.up)setTimeout(()=>sfx('level'),900)},stg?2700:200);
+  setTimeout(()=>{if(st.c!==C||C.quit)return;st.screen='result';render();window.scrollTo(0,0);save();if(C.award.up)setTimeout(()=>sfx('level'),900)},stg?2700:200);
   return true;
 }
 async function save(){
@@ -1784,8 +1809,11 @@ document.addEventListener('click',e=>{
   else if(act==='newrun')startRun();
   else if(act==='endrun'){st.run=null;st.screen='clinic';render();window.scrollTo(0,0)}
   else if(act==='finish'){st.c.busy=true;finish()}
+  else if(act==='quit')askQuit();
+  else if(act==='quitno'){const q=$('#quitbox');if(q)q.remove()}
+  else if(act==='quityes')doQuit();
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#overlay').innerHTML&&!$('#overlay .triage,#overlay .coach'))$('#overlay').innerHTML=''});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#quitbox')){$('#quitbox').remove();return}if(e.key==='Escape'&&$('#overlay').innerHTML&&!$('#overlay .triage,#overlay .coach'))$('#overlay').innerHTML=''});
 document.addEventListener('submit',e=>{e.preventDefault();const n=$('#nome').value.trim().replace(/\s+/g,' ');
   if(n.length<3||!n.includes(' ')){$('#nomeErr').hidden=false;return}st.name=n;remember();st.screen=st.avatar?(st.rulesSeen?'clinic':'rules'):'avatar';render();});
 let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(st.screen==='case')updHand()},120)});
@@ -1873,7 +1901,7 @@ function vCase(){
    <div class="bubble vet" id="b-vet"></div><div class="bubble tutor" id="b-tutor"></div>
    <span class="tag">${esc(cs.nome)} · ${esc(cs.resumo)}</span>
    <div class="intent" id="intent" hidden></div>
-   <button class="sndbtn" id="soundBtn" data-act="sound" aria-label="Som" aria-pressed="${SND.on}">${soundIcon()}</button></div>
+   <button class="sndbtn" id="soundBtn" data-act="sound" aria-label="Som" aria-pressed="${SND.on}">${soundIcon()}</button><button class="quitbtn" data-act="quit" aria-label="Cancelar atendimento">✕ Sair</button></div>
    <div class="profbar" id="profbar" aria-live="polite"><span class="hd"><svg viewBox="-22 -166 44 44" aria-hidden="true">${person({coat:true,style:'short',hair:'#c9c9c9',skin:'#e3b08a',glasses:true,beard:true})}</svg></span>
     <div><b>Professor(a) na sala</b><span id="profText">Estou aqui para ajudar. Siga as etapas da mesa, da esquerda para a direita.</span></div></div>
    <div class="queixa">${ICON.anam}<div><b>Queixa do tutor</b>“${esc(cs.fala)}”</div></div>
